@@ -62,7 +62,6 @@ void Output(int index, unsigned char A, int *bufferpos, char *buffer)
   // write a little bit in advance
   for(k=0; k<5; k++) {
     buffer[(*bufferpos)/50 + k] = (A & 15)*16;
-    *bufferpos = *bufferpos + 1;
   }
 }
 

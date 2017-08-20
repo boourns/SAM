@@ -1,4 +1,5 @@
 
+
 #include "render.h"
 
 extern unsigned char speed;
@@ -56,18 +57,36 @@ unsigned char mem38;
 
 void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
 {
-  unsigned char tiny_buffer[32];
-  unsigned int tiny_bufferpos = 0;
+  char *tiny_buffer = (char *) malloc(600);
+  int tiny_bufferpos = 0;
 
   unsigned char Y = 0;
   glottal_pulse = pitches[0];
   mem38 = glottal_pulse - (glottal_pulse >> 2); // mem44 * 0.75
 
   while(mem48) {
-    unsigned char absorbed = ProcessFrame(Y, mem48, bufferpos, buffer);
+    unsigned char absorbed = ProcessFrame(Y, mem48, &tiny_bufferpos, &tiny_buffer[0]);
+    if (absorbed == 0) {
+      printf("absorbed 0\n");
+    } else {
+      printf("absorbed %d\n", absorbed);
+    }
+
+    while (tiny_bufferpos / 50 > 20) {
+      // consume a sound byte, leaving 5 in the window.
+      for (int k = 0; k < 5; k++) {
+        buffer[*bufferpos/50] = tiny_buffer[k];
+        *bufferpos = *bufferpos + 50;
+      }
+      for (int k = 5; k < tiny_bufferpos/50; k++) {
+        tiny_buffer[k-5] = tiny_buffer[k];
+      }
+      tiny_bufferpos -= 250;
+    }
     Y += absorbed;
     mem48 -= absorbed;
   }
+  printf("about to exit\n");
 }
 
 unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer)
@@ -88,7 +107,7 @@ unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos,
       if (speedcounter == 0) {
         absorbed = 1;
 
-        if(mem48 == 0) {
+        if(mem48 == 1) {
           return absorbed;
         }
         speedcounter = speed;

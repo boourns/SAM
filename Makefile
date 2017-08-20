@@ -3,7 +3,7 @@ OBJS = reciter.o sam.o render.o main.o debug.o processframes.o createtransitions
 CC = gcc
 
 # libsdl present
-CFLAGS =  -Wall -O2 -DUSESDL `sdl-config --cflags` -g
+CFLAGS =  -Wall -DUSESDL `sdl-config --cflags` -g
 LFLAGS = `sdl-config --libs`
 
 # no libsdl present
