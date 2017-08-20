@@ -14,44 +14,9 @@ enum {
   END   = 255
 };
 
-char input[256]; //tab39445
-//standard sam sound
-unsigned char speed = 72;
-unsigned char pitch = 64;
-unsigned char mouth = 128;
-unsigned char throat = 128;
-int singmode = 0;
-
 extern int debug;
 
-unsigned char mem39;
-unsigned char mem44;
-unsigned char mem47;
-unsigned char mem49;
-unsigned char mem50;
-unsigned char mem51;
-unsigned char mem53;
-unsigned char mem59=0;
-
-unsigned char X;
-
-unsigned char stress[256]; //numbers from 0 to 8
-unsigned char phonemeLength[256]; //tab40160
-unsigned char phonemeindex[256];
-
-unsigned char phonemeIndexOutput[60]; //tab47296
-unsigned char stressOutput[60]; //tab47365
-unsigned char phonemeLengthOutput[60]; //tab47416
-
-
-
-
-// contains the final soundbuffer
-int bufferpos=0;
-char *buffer = NULL;
-
-
-void SetInput(char *_input)
+void SAM::SetInput(char *_input)
 {
   int i, l;
   l = strlen(_input);
@@ -61,34 +26,21 @@ void SetInput(char *_input)
   input[l] = 0;
 }
 
-void SetSpeed(unsigned char _speed) {speed = _speed;};
-void SetPitch(unsigned char _pitch) {pitch = _pitch;};
-void SetMouth(unsigned char _mouth) {mouth = _mouth;};
-void SetThroat(unsigned char _throat) {throat = _throat;};
-void EnableSingmode() {singmode = 1;};
-char* GetBuffer(){return buffer;};
-int GetBufferLength(){return bufferpos;};
+void SAM::SetSpeed(unsigned char _speed) {speed = _speed;};
+void SAM::SetPitch(unsigned char _pitch) {pitch = _pitch;};
+void SAM::SetMouth(unsigned char _mouth) {mouth = _mouth;};
+void SAM::SetThroat(unsigned char _throat) {throat = _throat;};
+void SAM::EnableSingmode() {singmode = 1;};
+char* SAM::GetBuffer(){return buffer;};
+int SAM::GetBufferLength(){return bufferpos;};
 
-void Init();
-int Parser1();
-void Parser2();
-int SAMMain();
-void CopyStress();
-void SetPhonemeLength();
-void AdjustLengths();
-void Code41240();
-void Insert(unsigned char position, unsigned char mem60, unsigned char mem59, unsigned char mem58);
-void InsertBreath(unsigned char mem59);
-void PrepareOutput();
-void SetMouthThroat(unsigned char mouth, unsigned char throat);
-
-void Init() {
+void SAM::Init() {
   int i;
   SetMouthThroat( mouth, throat);
 
   bufferpos = 0;
   // TODO, check for free the memory, 10 seconds of output should be more than enough
-  buffer = malloc(22050*10);
+  buffer = (char *) malloc(22050*10);
 
   for(i=0; i<256; i++) {
     stress[i] = 0;
@@ -103,7 +55,7 @@ void Init() {
   phonemeindex[255] = END; //to prevent buffer overflow // ML : changed from 32 to 255 to stop freezing with long inputs
 }
 
-int SAMMain() {
+int SAM::SAMMain() {
   Init();
   /* FIXME: At odds with assignment in Init() */
   phonemeindex[255] = 32; //to prevent buffer overflow
@@ -129,7 +81,7 @@ int SAMMain() {
   return 1;
 }
 
-void PrepareOutput() {
+void SAM::PrepareOutput() {
   unsigned char srcpos  = 0; // Position in source
   unsigned char destpos = 0; // Position in output
 
@@ -157,7 +109,7 @@ void PrepareOutput() {
 }
 
 
-void InsertBreath(unsigned char mem59) {
+void SAM::InsertBreath(unsigned char mem59) {
   unsigned char mem54 = 255;
   unsigned char len = 0;
   unsigned char index; //variable Y
@@ -203,7 +155,7 @@ void InsertBreath(unsigned char mem59) {
 
 
 
-void CopyStress() {
+void SAM::CopyStress() {
   // loop thought all the phonemes to be output
   unsigned char pos=0; //mem66
   unsigned char Y;
@@ -228,7 +180,7 @@ void CopyStress() {
   }
 }
 
-void Insert(unsigned char position/*var57*/, unsigned char mem60, unsigned char mem59, unsigned char mem58)
+void SAM::Insert(unsigned char position/*var57*/, unsigned char mem60, unsigned char mem59, unsigned char mem58)
 {
   int i;
   for(i=253; i >= position; i--) // ML : always keep last safe-guarding 255
@@ -324,7 +276,7 @@ signed int wild_match(unsigned char sign1, unsigned char sign2) {
 // The character <0x9B> marks the end of text in input[]. When it is reached,
 // the index 255 is placed at the end of the phonemeIndexTable[], and the
 // function returns with a 1 indicating success.
-int Parser1()
+int SAM::Parser1()
 {
   int i;
   unsigned char sign1;
@@ -362,7 +314,7 @@ int Parser1()
 
 
 //change phonemelength depedendent on stress
-void SetPhonemeLength() {
+void SAM::SetPhonemeLength() {
   int position = 0;
   while(phonemeindex[position] != 255 ) {
     unsigned char A = stress[position];
@@ -375,7 +327,7 @@ void SetPhonemeLength() {
   }
 }
 
-void Code41240() {
+void SAM::Code41240() {
   unsigned char pos=0;
 
   while(phonemeindex[pos] != END) {
@@ -401,28 +353,27 @@ void Code41240() {
 }
 
 
-void ChangeRule(unsigned char position, unsigned char rule,unsigned char mem60, unsigned char mem59, unsigned char stress, const char * descr)
+void SAM::ChangeRule(unsigned char position, unsigned char rule,unsigned char mem60, unsigned char mem59, unsigned char stress, const char * descr)
 {
   if (debug) printf("RULE: %s\n",descr);
   phonemeindex[position] = rule;
   Insert(position+1, mem60, mem59, stress);
 }
 
-void drule(const char * str) {
+void SAM::drule(const char * str) {
   if (debug) printf("RULE: %s\n",str);
 }
 
-void drule_pre(const char *descr, unsigned char X) {
+void SAM::drule_pre(const char *descr, unsigned char X) {
   drule(descr);
   if (debug) printf("PRE\n");
   if (debug) printf("phoneme %d (%c%c) length %d\n", X, signInputTable1[phonemeindex[X]], signInputTable2[phonemeindex[X]],  phonemeLength[X]);
 }
 
-void drule_post(unsigned char X) {
+void SAM::drule_post(unsigned char X) {
   if (debug) printf("POST\n");
   if (debug) printf("phoneme %d (%c%c) length %d\n", X, signInputTable1[phonemeindex[X]], signInputTable2[phonemeindex[X]], phonemeLength[X]);
 }
-
 
 // Rewrites the phonemes using the following rules:
 //
@@ -449,7 +400,7 @@ void drule_post(unsigned char X) {
 //       <UNSTRESSED VOWEL> D <PAUSE>  -> <UNSTRESSED VOWEL> DX <PAUSE>
 
 
-void rule_alveolar_uw(unsigned char X) {
+void SAM::rule_alveolar_uw(unsigned char X) {
   // ALVEOLAR flag set?
   if (flags[phonemeindex[X-1]] & FLAG_ALVEOLAR) {
     drule("<ALVEOLAR> UW -> <ALVEOLAR> UX");
@@ -457,17 +408,17 @@ void rule_alveolar_uw(unsigned char X) {
   }
 }
 
-void rule_ch(unsigned char X, unsigned char mem59) {
+void SAM::rule_ch(unsigned char X, unsigned char mem59) {
   drule("CH -> CH CH+1");
   Insert(X+1, 43, mem59, stress[X]);
 }
 
-void rule_j(unsigned char X, unsigned char mem59) {
+void SAM::rule_j(unsigned char X, unsigned char mem59) {
   drule("J -> J J+1");
   Insert(X+1, 45, mem59, stress[X]);
 }
 
-void rule_g(unsigned char pos) {
+void SAM::rule_g(unsigned char pos) {
   // G <VOWEL OR DIPTHONG NOT ENDING WITH IY> -> GX <VOWEL OR DIPTHONG NOT ENDING WITH IY>
   // Example: GO
 
@@ -482,13 +433,13 @@ void rule_g(unsigned char pos) {
 }
 
 
-void change(unsigned char pos, unsigned char val, const char * rule) {
+void SAM::change(unsigned char pos, unsigned char val, const char * rule) {
   drule(rule);
   phonemeindex[pos] = val;
 }
 
 
-void rule_dipthong(unsigned char p, unsigned char pf, unsigned char pos, unsigned char mem59) {
+void SAM::rule_dipthong(unsigned char p, unsigned char pf, unsigned char pos, unsigned char mem59) {
   // <DIPTHONG ENDING WITH WX> -> <DIPTHONG ENDING WITH WX> WX
   // <DIPTHONG NOT ENDING WITH WX> -> <DIPTHONG NOT ENDING WITH WX> YX
   // Example: OIL, COW
@@ -508,7 +459,7 @@ void rule_dipthong(unsigned char p, unsigned char pf, unsigned char pos, unsigne
   }
 }
 
-void Parser2() {
+void SAM::Parser2() {
   unsigned char pos = 0; //mem66;
   unsigned char p;
 
@@ -609,7 +560,7 @@ pos++;
 //         <VOICED STOP CONSONANT> {optional silence} <STOP CONSONANT> - shorten both to 1/2 + 1
 //         <LIQUID CONSONANT> <DIPTHONG> - decrease by 2
 //
-void AdjustLengths() {
+void SAM::AdjustLengths() {
   // LENGTHEN VOWELS PRECEDING PUNCTUATION
   //
   // Search for punctuation. If found, back up to the first vowel, then

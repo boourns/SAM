@@ -91,14 +91,15 @@ void PrintUsage()
 	printf("UN           functi(on) (=AXN)         CH        speech		\n");
 	printf("Q            kitt-en (glottal stop)    /H        a(h)ead	\n");
 }
+SAM *sam;
+
 
 #ifdef USESDL
-
 int pos = 0;
 void MixAudio(void *unused, Uint8 *stream, int len)
 {
-	int bufferpos = GetBufferLength();
-	char *buffer = GetBuffer();
+	int bufferpos = sam->GetBufferLength();
+	char *buffer = sam->GetBuffer();
 	int i;
 	if (pos >= bufferpos) return;
 	if ((bufferpos-pos) < len) len = (bufferpos-pos);
@@ -109,10 +110,9 @@ void MixAudio(void *unused, Uint8 *stream, int len)
 	}
 }
 
-
 void OutputSound()
 {
-	int bufferpos = GetBufferLength();
+	int bufferpos = sam->GetBufferLength();
 	bufferpos /= 50;
 	SDL_AudioSpec fmt;
 
@@ -164,6 +164,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	sam = new SAM();
+
 	i = 1;
 	while(i < argc)
 	{
@@ -180,7 +182,7 @@ int main(int argc, char **argv)
 			} else
 			if (strcmp(&argv[i][1], "sing")==0)
 			{
-				EnableSingmode();
+				sam->EnableSingmode();
 			} else
 			if (strcmp(&argv[i][1], "phonetic")==0)
 			{
@@ -192,22 +194,22 @@ int main(int argc, char **argv)
 			} else
 			if (strcmp(&argv[i][1], "pitch")==0)
 			{
-				SetPitch(atoi(argv[i+1]));
+				sam->SetPitch(atoi(argv[i+1]));
 				i++;
 			} else
 			if (strcmp(&argv[i][1], "speed")==0)
 			{
-				SetSpeed(atoi(argv[i+1]));
+				sam->SetSpeed(atoi(argv[i+1]));
 				i++;
 			} else
 			if (strcmp(&argv[i][1], "mouth")==0)
 			{
-				SetMouth(atoi(argv[i+1]));
+				sam->SetMouth(atoi(argv[i+1]));
 				i++;
 			} else
 			if (strcmp(&argv[i][1], "throat")==0)
 			{
-				SetThroat(atoi(argv[i+1]));
+				sam->SetThroat(atoi(argv[i+1]));
 				i++;
 			} else
 			{
@@ -245,15 +247,15 @@ int main(int argc, char **argv)
 	atexit(SDL_Quit);
 	#endif
 
-	SetInput(input);
-	if (!SAMMain())
+	sam->SetInput(input);
+	if (!sam->SAMMain())
 	{
 		PrintUsage();
 		return 1;
 	}
 
 	if (wavfilename != NULL)
-	WriteWav(wavfilename, GetBuffer(), GetBufferLength()/50);
+	WriteWav(wavfilename, sam->GetBuffer(), sam->GetBufferLength()/50);
 	else
 	OutputSound();
 

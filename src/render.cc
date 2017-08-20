@@ -2,39 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "sam.h"
 #include "render.h"
 #include "RenderTabs.h"
 
 #include "debug.h"
 extern int debug;
 
-unsigned char wait1 = 7;
-unsigned char wait2 = 6;
-
-//extern unsigned char A, X, Y;
-//extern unsigned char mem44;
-
-extern unsigned char speed;
-extern unsigned char pitch;
-extern int singmode;
-
-extern unsigned char phonemeIndexOutput[60]; //tab47296
-extern unsigned char stressOutput[60]; //tab47365
-extern unsigned char phonemeLengthOutput[60]; //tab47416
-
-unsigned char pitches[256]; // tab43008
-
-unsigned char frequency1[256];
-unsigned char frequency2[256];
-unsigned char frequency3[256];
-
-unsigned char amplitude1[256];
-unsigned char amplitude2[256];
-unsigned char amplitude3[256];
-
-unsigned char sampledConsonantFlag[256]; // tab44800
-
-void AddInflection(unsigned char mem48, unsigned char phase1, unsigned char X);
+//void AddInflection(unsigned char mem48, unsigned char phase1, unsigned char X);
 
 //return = hibyte(mem39212*mem39213) <<  1
 unsigned char trans(unsigned char a, unsigned char b)
@@ -52,7 +27,7 @@ int timetable[5][5] =
   {199, 0, 0, 54, 54}
 };
 
-void Output(int index, unsigned char A, int *bufferpos, char *buffer)
+void SAM::Output(int index, unsigned char A, int *bufferpos, char *buffer)
 {
   static unsigned oldtimetableindex = 0;
   int k;
@@ -65,7 +40,7 @@ void Output(int index, unsigned char A, int *bufferpos, char *buffer)
   }
 }
 
-static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, unsigned char phase1, int *bufferpos, char *buffer)
+unsigned char SAM::RenderVoicedSample(unsigned short hi, unsigned char off, unsigned char phase1, int *bufferpos, char *buffer)
 {
   do {
     unsigned char sample = sampleTable[hi+off];
@@ -80,7 +55,7 @@ static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, un
   return off;
 }
 
-static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned char mem53, int *bufferpos, char *buffer)
+void SAM::RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned char mem53, int *bufferpos, char *buffer)
 {
   do {
     unsigned char bit = 8;
@@ -92,8 +67,6 @@ static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned 
     } while (--bit != 0);
   } while (++off != 0);
 }
-
-
 
 // -------------------------------------------------------------------------
 //Code48227
@@ -150,7 +123,7 @@ static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned 
 // For voices samples, samples are interleaved between voiced output.
 
 
-void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned char mem49, int *bufferpos, char *buffer)
+void SAM::RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned char mem49, int *bufferpos, char *buffer)
 {
   // mem49 == current phoneme's index
 
@@ -177,8 +150,6 @@ void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned ch
   RenderUnvoicedSample(hi, pitch^255, tab48426[hibyte], bufferpos, buffer);
 }
 
-
-
 // CREATE FRAMES
 //
 // The length parameter in the list corresponds to the number of frames
@@ -187,7 +158,7 @@ void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned ch
 //
 // The parameters are copied from the phoneme to the frame verbatim.
 //
-static void CreateFrames()
+void SAM::CreateFrames()
 {
   unsigned char phase1 = 0;
 
@@ -231,7 +202,7 @@ static void CreateFrames()
 //
 // Rescale volume from a linear scale to decibels.
 //
-void RescaleAmplitude()
+void SAM::RescaleAmplitude()
 {
   int i;
   for(i=255; i>=0; i--)
@@ -250,7 +221,7 @@ void RescaleAmplitude()
 // pitch contour. Without this, the output would be at a single
 // pitch level (monotone).
 
-void AssignPitchContour()
+void SAM::AssignPitchContour()
 {
   int i;
   for(i=0; i<256; i++) {
@@ -274,7 +245,7 @@ void AssignPitchContour()
 // 3. Offset the pitches by the fundamental frequency.
 //
 // 4. Render the each frame.
-void Render(int *bufferpos, char *buffer)
+void SAM::Render(int *bufferpos, char *buffer)
 {
   if (phonemeIndexOutput[0] == 255) return; //exit if no data
 
@@ -296,7 +267,7 @@ void Render(int *bufferpos, char *buffer)
 // index X. A rising inflection is used for questions, and
 // a falling inflection is used for statements.
 
-void AddInflection(unsigned char inflection, unsigned char phase1, unsigned char pos)
+void SAM::AddInflection(unsigned char inflection, unsigned char phase1, unsigned char pos)
 {
   unsigned char A;
   // store the location of the punctuation
@@ -325,7 +296,7 @@ SAM's voice can be altered by changing the frequencies of the
 mouth formant (F1) and the throat formant (F2). Only the voiced
 phonemes (5-29 and 48-53) are altered.
 */
-void SetMouthThroat(unsigned char mouth, unsigned char throat)
+void SAM::SetMouthThroat(unsigned char mouth, unsigned char throat)
 {
   unsigned char initialFrequency;
   unsigned char newFrequency = 0;

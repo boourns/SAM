@@ -1,27 +1,9 @@
+#include <stdlib.h>
 
+#include "sam.h"
+#include "RenderTabs.h"
 
-#include "render.h"
-
-extern unsigned char speed;
-
-// From RenderTabs.h
-extern unsigned char multtable[];
-extern unsigned char sinus[];
-extern unsigned char rectangle[];
-
-// From render.c
-extern unsigned char pitches[256];
-extern unsigned char sampledConsonantFlag[256]; // tab44800
-extern unsigned char amplitude1[256];
-extern unsigned char amplitude2[256];
-extern unsigned char amplitude3[256];
-extern unsigned char frequency1[256];
-extern unsigned char frequency2[256];
-extern unsigned char frequency3[256];
-
-extern void Output(int index, unsigned char A, int *bufferpos, char *buffer);
-
-static void CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, unsigned char phase3, unsigned char Y, int *bufferpos, char *buffer)
+void SAM::CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, unsigned char phase3, unsigned char Y, int *bufferpos, char *buffer)
 {
   unsigned int tmp;
 
@@ -35,8 +17,6 @@ static void CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2
   Output(0, tmp & 0xf, bufferpos, buffer);
 }
 
-unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer);
-
 // PROCESS THE FRAMES
 //
 // In traditional vocal synthesis, the glottal pulse drives filters, which
@@ -47,15 +27,7 @@ unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos,
 // reset at the beginning of each glottal pulse.
 //
 
-unsigned char speedcounter = 72;
-unsigned char phase1 = 0;
-unsigned char phase2 = 0;
-unsigned char phase3 = 0;
-unsigned char mem66;
-unsigned char glottal_pulse;
-unsigned char mem38;
-
-void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
+void SAM::ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
 {
   char *tiny_buffer = (char *) malloc(50000);
   int tiny_bufferpos = 0;
@@ -83,7 +55,7 @@ void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
   }
 }
 
-unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer)
+unsigned char SAM::ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer)
 {
     unsigned char flags = sampledConsonantFlag[Y];
     unsigned char absorbed = 0;

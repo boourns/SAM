@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include "render.h"
 
+#include "RenderTabs.h"
+#include "sam.h"
+
 // CREATE TRANSITIONS
 //
 // Linear transitions are now created to smoothly connect each
 // phoeneme. This transition is spread between the ending frames
-// of the old phoneme (outBlendLength), and the beginning frames 
+// of the old phoneme (outBlendLength), and the beginning frames
 // of the new phoneme (inBlendLength).
 //
 // To determine how many frames to use, the two phonemes are
@@ -36,27 +39,6 @@
 // pitch from the center of the current phoneme to the center of the next
 // phoneme.
 
-// From render.c
-extern unsigned char phonemeIndexOutput[60]; //tab47296
-extern unsigned char phonemeLengthOutput[60]; //tab47416
-
-// from RenderTabs.h
-extern unsigned char blendRank[];
-extern unsigned char outBlendLength[];
-extern unsigned char inBlendLength[];
-extern unsigned char pitches[];
-
-extern unsigned char Read(unsigned char p, unsigned char Y);
-extern void Write(unsigned char p, unsigned char Y, unsigned char value);
-
-extern unsigned char frequency1[256];
-extern unsigned char frequency2[256];
-extern unsigned char frequency3[256];
-
-extern unsigned char amplitude1[256];
-extern unsigned char amplitude2[256];
-extern unsigned char amplitude3[256];
-
 //written by me because of different table positions.
 // mem[47] = ...
 // 168=pitches
@@ -66,7 +48,7 @@ extern unsigned char amplitude3[256];
 // 172=amplitude1
 // 173=amplitude2
 // 174=amplitude3
-unsigned char Read(unsigned char p, unsigned char Y)
+unsigned char SAM::Read(unsigned char p, unsigned char Y)
 {
 	switch(p)
 	{
@@ -82,7 +64,7 @@ unsigned char Read(unsigned char p, unsigned char Y)
 	return 0;
 }
 
-void Write(unsigned char p, unsigned char Y, unsigned char value)
+void SAM::Write(unsigned char p, unsigned char Y, unsigned char value)
 {
 
 	switch(p)
@@ -100,7 +82,7 @@ void Write(unsigned char p, unsigned char Y, unsigned char value)
 
 
 // linearly interpolate values
-void interpolate(unsigned char width, unsigned char table, unsigned char frame, unsigned char mem53)
+void SAM::interpolate(unsigned char width, unsigned char table, unsigned char frame, unsigned char mem53)
 {
 	unsigned char sign      = ((char)(mem53) < 0);
 	unsigned char remainder = abs((char)mem53) % width;
@@ -122,7 +104,7 @@ void interpolate(unsigned char width, unsigned char table, unsigned char frame, 
 	}
 }
 
-void interpolate_pitch(unsigned char width, unsigned char pos, unsigned char mem49, unsigned char phase3) {
+void SAM::interpolate_pitch(unsigned char width, unsigned char pos, unsigned char mem49, unsigned char phase3) {
 	// unlike the other values, the pitches[] interpolates from
 	// the middle of the current phoneme to the middle of the
 	// next phoneme
@@ -137,7 +119,7 @@ void interpolate_pitch(unsigned char width, unsigned char pos, unsigned char mem
 }
 
 
-unsigned char CreateTransitions()
+unsigned char SAM::CreateTransitions()
 {
 	unsigned char phase1;
 	unsigned char phase2;
