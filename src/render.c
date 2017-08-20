@@ -42,7 +42,7 @@ void AddInflection(unsigned char mem48, unsigned char phase1, unsigned char X);
 //return = hibyte(mem39212*mem39213) <<  1
 unsigned char trans(unsigned char a, unsigned char b)
 {
-    return ((a * b) >> 8) << 1;
+  return ((a * b) >> 8) << 1;
 }
 
 
@@ -57,51 +57,51 @@ extern char *buffer;
 //timetable for more accurate c64 simulation
 int timetable[5][5] =
 {
-	{162, 167, 167, 127, 128},
-	{226, 60, 60, 0, 0},
-	{225, 60, 59, 0, 0},
-	{200, 0, 0, 54, 55},
-	{199, 0, 0, 54, 54}
+  {162, 167, 167, 127, 128},
+  {226, 60, 60, 0, 0},
+  {225, 60, 59, 0, 0},
+  {200, 0, 0, 54, 55},
+  {199, 0, 0, 54, 54}
 };
 
 void Output(int index, unsigned char A)
 {
-	static unsigned oldtimetableindex = 0;
-	int k;
-	bufferpos += timetable[oldtimetableindex][index];
-	oldtimetableindex = index;
-	// write a little bit in advance
-	for(k=0; k<5; k++)
-		buffer[bufferpos/50 + k] = (A & 15)*16;
+  static unsigned oldtimetableindex = 0;
+  int k;
+  bufferpos += timetable[oldtimetableindex][index];
+  oldtimetableindex = index;
+  // write a little bit in advance
+  for(k=0; k<5; k++)
+  buffer[bufferpos/50 + k] = (A & 15)*16;
 }
 
 
 static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, unsigned char phase1)
 {
-	do {
-		unsigned char sample = sampleTable[hi+off];
-		unsigned char bit = 8;
-		do {
-			if ((sample & 128) != 0) Output(3, 26);
-			else Output(4, 6);
-			sample <<= 1;
-		} while(--bit != 0);
-		off++;
-	} while (++phase1 != 0);
-	return off;
+  do {
+    unsigned char sample = sampleTable[hi+off];
+    unsigned char bit = 8;
+    do {
+      if ((sample & 128) != 0) Output(3, 26);
+      else Output(4, 6);
+      sample <<= 1;
+    } while(--bit != 0);
+    off++;
+  } while (++phase1 != 0);
+  return off;
 }
 
 static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned char mem53)
 {
+  do {
+    unsigned char bit = 8;
+    unsigned char sample = sampleTable[hi+off];
     do {
-        unsigned char bit = 8;
-        unsigned char sample = sampleTable[hi+off];
-        do {
-            if ((sample & 128) != 0) Output(2, 5);
-            else Output(1, mem53);
-            sample <<= 1;
-        } while (--bit != 0);
-    } while (++off != 0);
+      if ((sample & 128) != 0) Output(2, 5);
+      else Output(1, mem53);
+      sample <<= 1;
+    } while (--bit != 0);
+  } while (++off != 0);
 }
 
 
@@ -128,7 +128,7 @@ static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned 
 //   44: J*
 //   45: **    257            276
 //   46: **
-// 
+//
 //   66: P*
 //   67: **    743            767
 //   68: **
@@ -162,30 +162,30 @@ static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned 
 
 
 void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned char mem49)
-{     
-	// mem49 == current phoneme's index
+{
+  // mem49 == current phoneme's index
 
-	// mask low three bits and subtract 1 get value to 
-	// convert 0 bits on unvoiced samples.
-	unsigned char hibyte = (consonantFlag & 7)-1;
-	
-	// determine which offset to use from table { 0x18, 0x1A, 0x17, 0x17, 0x17 }
-	// T, S, Z                0          0x18
-	// CH, J, SH, ZH          1          0x1A
-	// P, F*, V, TH, DH       2          0x17
-	// /H                     3          0x17
-	// /X                     4          0x17
+  // mask low three bits and subtract 1 get value to
+  // convert 0 bits on unvoiced samples.
+  unsigned char hibyte = (consonantFlag & 7)-1;
 
-    unsigned short hi = hibyte*256;
-	// voiced sample?
-	unsigned char pitch = consonantFlag & 248;
-	if(pitch == 0) {
-        // voiced phoneme: Z*, ZH, V*, DH
-		pitch = pitches[mem49] >> 4;
-        *mem66 = RenderVoicedSample(hi, *mem66, pitch ^ 255);
-        return;
-	}
-    RenderUnvoicedSample(hi, pitch^255, tab48426[hibyte]);
+  // determine which offset to use from table { 0x18, 0x1A, 0x17, 0x17, 0x17 }
+  // T, S, Z                0          0x18
+  // CH, J, SH, ZH          1          0x1A
+  // P, F*, V, TH, DH       2          0x17
+  // /H                     3          0x17
+  // /X                     4          0x17
+
+  unsigned short hi = hibyte*256;
+  // voiced sample?
+  unsigned char pitch = consonantFlag & 248;
+  if(pitch == 0) {
+    // voiced phoneme: Z*, ZH, V*, DH
+    pitch = pitches[mem49] >> 4;
+    *mem66 = RenderVoicedSample(hi, *mem66, pitch ^ 255);
+    return;
+  }
+  RenderUnvoicedSample(hi, pitch^255, tab48426[hibyte]);
 }
 
 
@@ -200,41 +200,41 @@ void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned ch
 //
 static void CreateFrames()
 {
-	unsigned char phase1 = 0;
+  unsigned char phase1 = 0;
 
-	unsigned char X = 0;
-    unsigned int i = 0;
-    while(i < 256) {
-        // get the phoneme at the index
-        unsigned char phoneme = phonemeIndexOutput[i];
-	
-        // if terminal phoneme, exit the loop
-        if (phoneme == 255) break;
-	
-        if (phoneme == PHONEME_PERIOD)   AddInflection(RISING_INFLECTION, phase1,X);
-        else if (phoneme == PHONEME_QUESTION) AddInflection(FALLING_INFLECTION, phase1,X);
+  unsigned char X = 0;
+  unsigned int i = 0;
+  while(i < 256) {
+    // get the phoneme at the index
+    unsigned char phoneme = phonemeIndexOutput[i];
 
-        // get the stress amount (more stress = higher pitch)
-        phase1 = tab47492[stressOutput[i] + 1];
-	
-        // get number of frames to write
-        unsigned phase2 = phonemeLengthOutput[i];
-	
-        // copy from the source to the frames list
-        do {
-            frequency1[X] = freq1data[phoneme];     // F1 frequency
-            frequency2[X] = freq2data[phoneme];     // F2 frequency
-            frequency3[X] = freq3data[phoneme];     // F3 frequency
-            amplitude1[X] = ampl1data[phoneme];     // F1 amplitude
-            amplitude2[X] = ampl2data[phoneme];     // F2 amplitude
-            amplitude3[X] = ampl3data[phoneme];     // F3 amplitude
-            sampledConsonantFlag[X] = sampledConsonantFlags[phoneme];        // phoneme data for sampled consonants
-            pitches[X] = pitch + phase1;      // pitch
-            ++X;
-        } while(--phase2 != 0);
-        
-        ++i;
-    }
+    // if terminal phoneme, exit the loop
+    if (phoneme == 255) break;
+
+    if (phoneme == PHONEME_PERIOD)   AddInflection(RISING_INFLECTION, phase1,X);
+    else if (phoneme == PHONEME_QUESTION) AddInflection(FALLING_INFLECTION, phase1,X);
+
+    // get the stress amount (more stress = higher pitch)
+    phase1 = tab47492[stressOutput[i] + 1];
+
+    // get number of frames to write
+    unsigned phase2 = phonemeLengthOutput[i];
+
+    // copy from the source to the frames list
+    do {
+      frequency1[X] = freq1data[phoneme];     // F1 frequency
+      frequency2[X] = freq2data[phoneme];     // F2 frequency
+      frequency3[X] = freq3data[phoneme];     // F3 frequency
+      amplitude1[X] = ampl1data[phoneme];     // F1 amplitude
+      amplitude2[X] = ampl2data[phoneme];     // F2 amplitude
+      amplitude3[X] = ampl3data[phoneme];     // F3 amplitude
+      sampledConsonantFlag[X] = sampledConsonantFlags[phoneme];        // phoneme data for sampled consonants
+      pitches[X] = pitch + phase1;      // pitch
+      ++X;
+    } while(--phase2 != 0);
+
+    ++i;
+  }
 }
 
 
@@ -242,15 +242,15 @@ static void CreateFrames()
 //
 // Rescale volume from a linear scale to decibels.
 //
-void RescaleAmplitude() 
+void RescaleAmplitude()
 {
-    int i;
-    for(i=255; i>=0; i--)
-        {
-            amplitude1[i] = amplitudeRescale[amplitude1[i]];
-            amplitude2[i] = amplitudeRescale[amplitude2[i]];
-            amplitude3[i] = amplitudeRescale[amplitude3[i]];
-        }
+  int i;
+  for(i=255; i>=0; i--)
+  {
+    amplitude1[i] = amplitudeRescale[amplitude1[i]];
+    amplitude2[i] = amplitudeRescale[amplitude2[i]];
+    amplitude3[i] = amplitudeRescale[amplitude3[i]];
+  }
 }
 
 
@@ -262,13 +262,13 @@ void RescaleAmplitude()
 // pitch level (monotone).
 
 void AssignPitchContour()
-{	
-    int i;
-    for(i=0; i<256; i++) {
-        // subtract half the frequency of the formant 1.
-        // this adds variety to the voice
-        pitches[i] -= (frequency1[i] >> 1);
-    }
+{
+  int i;
+  for(i=0; i<256; i++) {
+    // subtract half the frequency of the formant 1.
+    // this adds variety to the voice
+    pitches[i] -= (frequency1[i] >> 1);
+  }
 }
 
 
@@ -287,110 +287,109 @@ void AssignPitchContour()
 // 4. Render the each frame.
 void Render()
 {
-	if (phonemeIndexOutput[0] == 255) return; //exit if no data
+  if (phonemeIndexOutput[0] == 255) return; //exit if no data
 
-    CreateFrames();
-    unsigned char t = CreateTransitions();
+  CreateFrames();
+  unsigned char t = CreateTransitions();
 
-    if (!singmode) AssignPitchContour();
-    RescaleAmplitude();
+  if (!singmode) AssignPitchContour();
+  RescaleAmplitude();
 
-    if (debug) {
-        PrintOutput(sampledConsonantFlag, frequency1, frequency2, frequency3, amplitude1, amplitude2, amplitude3, pitches);
-    }
+  if (debug) {
+    PrintOutput(sampledConsonantFlag, frequency1, frequency2, frequency3, amplitude1, amplitude2, amplitude3, pitches);
+  }
 
-    ProcessFrames(t);
+  ProcessFrames(t);
 }
 
 
-// Create a rising or falling inflection 30 frames prior to 
-// index X. A rising inflection is used for questions, and 
+// Create a rising or falling inflection 30 frames prior to
+// index X. A rising inflection is used for questions, and
 // a falling inflection is used for statements.
 
 void AddInflection(unsigned char inflection, unsigned char phase1, unsigned char pos)
 {
-    unsigned char A;
-    // store the location of the punctuation
-	unsigned char end = pos;
+  unsigned char A;
+  // store the location of the punctuation
+  unsigned char end = pos;
 
-    if (pos < 30) pos = 0;
-    else pos -= 30;
+  if (pos < 30) pos = 0;
+  else pos -= 30;
 
-	// FIXME: Explain this fix better, it's not obvious
-	// ML : A =, fixes a problem with invalid pitch with '.'
-	while( (A = pitches[pos]) == 127) ++pos;
+  // FIXME: Explain this fix better, it's not obvious
+  // ML : A =, fixes a problem with invalid pitch with '.'
+  while( (A = pitches[pos]) == 127) ++pos;
 
-    while (pos != end) {
-        // add the inflection direction
-        A += inflection;
-	
-        // set the inflection
-        pitches[pos] = A;
+  while (pos != end) {
+    // add the inflection direction
+    A += inflection;
 
-        while ((++pos != end) && pitches[pos] == 255);
-    } 
+    // set the inflection
+    pitches[pos] = A;
+
+    while ((++pos != end) && pitches[pos] == 255);
+  }
 }
 
 /*
-    SAM's voice can be altered by changing the frequencies of the
-    mouth formant (F1) and the throat formant (F2). Only the voiced
-    phonemes (5-29 and 48-53) are altered.
+SAM's voice can be altered by changing the frequencies of the
+mouth formant (F1) and the throat formant (F2). Only the voiced
+phonemes (5-29 and 48-53) are altered.
 */
 void SetMouthThroat(unsigned char mouth, unsigned char throat)
 {
-	unsigned char initialFrequency;
-	unsigned char newFrequency = 0;
+  unsigned char initialFrequency;
+  unsigned char newFrequency = 0;
 
-	// mouth formants (F1) 5..29
-	unsigned char mouthFormants5_29[30] = {
-		0, 0, 0, 0, 0, 10,
-		14, 19, 24, 27, 23, 21, 16, 20, 14, 18, 14, 18, 18,
-		16, 13, 15, 11, 18, 14, 11, 9, 6, 6, 6};
+  // mouth formants (F1) 5..29
+  unsigned char mouthFormants5_29[30] = {
+    0, 0, 0, 0, 0, 10,
+    14, 19, 24, 27, 23, 21, 16, 20, 14, 18, 14, 18, 18,
+    16, 13, 15, 11, 18, 14, 11, 9, 6, 6, 6};
 
-	// throat formants (F2) 5..29
-	unsigned char throatFormants5_29[30] = {
-	255, 255,
-	255, 255, 255, 84, 73, 67, 63, 40, 44, 31, 37, 45, 73, 49,
-	36, 30, 51, 37, 29, 69, 24, 50, 30, 24, 83, 46, 54, 86,
+    // throat formants (F2) 5..29
+    unsigned char throatFormants5_29[30] = {
+      255, 255,
+      255, 255, 255, 84, 73, 67, 63, 40, 44, 31, 37, 45, 73, 49,
+      36, 30, 51, 37, 29, 69, 24, 50, 30, 24, 83, 46, 54, 86,
     };
 
-	// there must be no zeros in this 2 tables
-	// formant 1 frequencies (mouth) 48..53
-	unsigned char mouthFormants48_53[6] = {19, 27, 21, 27, 18, 13};
-       
-	// formant 2 frequencies (throat) 48..53
-	unsigned char throatFormants48_53[6] = {72, 39, 31, 43, 30, 34};
+    // there must be no zeros in this 2 tables
+    // formant 1 frequencies (mouth) 48..53
+    unsigned char mouthFormants48_53[6] = {19, 27, 21, 27, 18, 13};
 
-	unsigned char pos = 5;
+    // formant 2 frequencies (throat) 48..53
+    unsigned char throatFormants48_53[6] = {72, 39, 31, 43, 30, 34};
 
-	// recalculate formant frequencies 5..29 for the mouth (F1) and throat (F2)
-	while(pos < 30)
-	{
-		// recalculate mouth frequency
-		initialFrequency = mouthFormants5_29[pos];
-		if (initialFrequency != 0) newFrequency = trans(mouth, initialFrequency);
-		freq1data[pos] = newFrequency;
-               
-		// recalculate throat frequency
-		initialFrequency = throatFormants5_29[pos];
-		if(initialFrequency != 0) newFrequency = trans(throat, initialFrequency);
-		freq2data[pos] = newFrequency;
-		pos++;
-	}
+    unsigned char pos = 5;
 
-	// recalculate formant frequencies 48..53
-	pos = 0;
+    // recalculate formant frequencies 5..29 for the mouth (F1) and throat (F2)
+    while(pos < 30)
+    {
+      // recalculate mouth frequency
+      initialFrequency = mouthFormants5_29[pos];
+      if (initialFrequency != 0) newFrequency = trans(mouth, initialFrequency);
+      freq1data[pos] = newFrequency;
+
+      // recalculate throat frequency
+      initialFrequency = throatFormants5_29[pos];
+      if(initialFrequency != 0) newFrequency = trans(throat, initialFrequency);
+      freq2data[pos] = newFrequency;
+      pos++;
+    }
+
+    // recalculate formant frequencies 48..53
+    pos = 0;
     while(pos < 6) {
-		// recalculate F1 (mouth formant)
-		initialFrequency = mouthFormants48_53[pos];
-		newFrequency = trans(mouth, initialFrequency);
-		freq1data[pos+48] = newFrequency;
-           
-		// recalculate F2 (throat formant)
-		initialFrequency = throatFormants48_53[pos];
-		newFrequency = trans(throat, initialFrequency);
-		freq2data[pos+48] = newFrequency;
-		pos++;
-	}
-}
+      // recalculate F1 (mouth formant)
+      initialFrequency = mouthFormants48_53[pos];
+      newFrequency = trans(mouth, initialFrequency);
+      freq1data[pos+48] = newFrequency;
 
+      // recalculate F2 (throat formant)
+      initialFrequency = throatFormants48_53[pos];
+      newFrequency = trans(throat, initialFrequency);
+      freq2data[pos+48] = newFrequency;
+      pos++;
+    }
+  }
