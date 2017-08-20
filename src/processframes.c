@@ -57,7 +57,7 @@ unsigned char mem38;
 
 void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
 {
-  char *tiny_buffer = (char *) malloc(600);
+  char *tiny_buffer = (char *) malloc(50000);
   int tiny_bufferpos = 0;
 
   unsigned char Y = 0;
@@ -66,11 +66,6 @@ void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
 
   while(mem48) {
     unsigned char absorbed = ProcessFrame(Y, mem48, &tiny_bufferpos, &tiny_buffer[0]);
-    if (absorbed == 0) {
-      printf("absorbed 0\n");
-    } else {
-      printf("absorbed %d\n", absorbed);
-    }
 
     while (tiny_bufferpos / 50 > 20) {
       // consume a sound byte, leaving 5 in the window.
@@ -78,7 +73,7 @@ void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
         buffer[*bufferpos/50] = tiny_buffer[k];
         *bufferpos = *bufferpos + 50;
       }
-      for (int k = 5; k < tiny_bufferpos/50; k++) {
+      for (int k = 5; k < (tiny_bufferpos/50) + 5; k++) {
         tiny_buffer[k-5] = tiny_buffer[k];
       }
       tiny_bufferpos -= 250;
@@ -86,7 +81,6 @@ void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
     Y += absorbed;
     mem48 -= absorbed;
   }
-  printf("about to exit\n");
 }
 
 unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer)
