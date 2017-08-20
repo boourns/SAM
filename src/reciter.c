@@ -211,7 +211,7 @@ int TextToPhonemes(char *input) {
 				case '+':
 				X = mem59;
 				A = inputtemp[--X];
-				if ((A != 'E') && (A != 'I') && (A && 'Y')) r = 1;
+				if ((A != 'E') && (A != 'I') && (A != 'Y')) r = 1;
 				break;
 				case ':':
 				while (Code37055(mem59-1,32)) --mem59;

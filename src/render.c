@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,7 +18,6 @@ extern unsigned char speed;
 extern unsigned char pitch;
 extern int singmode;
 
-
 extern unsigned char phonemeIndexOutput[60]; //tab47296
 extern unsigned char stressOutput[60]; //tab47365
 extern unsigned char phonemeLengthOutput[60]; //tab47416
@@ -36,7 +34,6 @@ unsigned char amplitude3[256];
 
 unsigned char sampledConsonantFlag[256]; // tab44800
 
-
 void AddInflection(unsigned char mem48, unsigned char phase1, unsigned char X);
 
 //return = hibyte(mem39212*mem39213) <<  1
@@ -45,14 +42,9 @@ unsigned char trans(unsigned char a, unsigned char b)
   return ((a * b) >> 8) << 1;
 }
 
-
-
-
 // contains the final soundbuffer
 extern int bufferpos;
 extern char *buffer;
-
-
 
 //timetable for more accurate c64 simulation
 int timetable[5][5] =
@@ -70,11 +62,12 @@ void Output(int index, unsigned char A)
   int k;
   bufferpos += timetable[oldtimetableindex][index];
   oldtimetableindex = index;
-  // write a little bit in advance
-  for(k=0; k<5; k++)
-  buffer[bufferpos/50 + k] = (A & 15)*16;
-}
 
+  // write a little bit in advance
+  for(k=0; k<5; k++) {
+    buffer[bufferpos/50 + k] = (A & 15)*16;
+  }
+}
 
 static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, unsigned char phase1)
 {
