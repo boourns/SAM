@@ -18,9 +18,9 @@ extern unsigned char frequency1[256];
 extern unsigned char frequency2[256];
 extern unsigned char frequency3[256];
 
-extern void Output(int index, unsigned char A);
+extern void Output(int index, unsigned char A, int *bufferpos, char *buffer);
 
-static void CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, unsigned char phase3, unsigned char Y)
+static void CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, unsigned char phase3, unsigned char Y, int *bufferpos, char *buffer)
 {
   unsigned int tmp;
 
@@ -31,10 +31,10 @@ static void CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2
   tmp  += 136;
   tmp >>= 4; // Scale down to 0..15 range of C64 audio.
 
-  Output(0, tmp & 0xf);
+  Output(0, tmp & 0xf, bufferpos, buffer);
 }
 
-unsigned char ProcessFrame(unsigned char Y, unsigned char mem48);
+unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer);
 
 // PROCESS THE FRAMES
 //
@@ -54,32 +54,35 @@ unsigned char mem66;
 unsigned char glottal_pulse;
 unsigned char mem38;
 
-void ProcessFrames(unsigned char mem48)
+void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
 {
+  unsigned char tiny_buffer[32];
+  unsigned int tiny_bufferpos = 0;
+
   unsigned char Y = 0;
   glottal_pulse = pitches[0];
   mem38 = glottal_pulse - (glottal_pulse >> 2); // mem44 * 0.75
 
   while(mem48) {
-    unsigned char absorbed = ProcessFrame(Y, mem48);
+    unsigned char absorbed = ProcessFrame(Y, mem48, bufferpos, buffer);
     Y += absorbed;
     mem48 -= absorbed;
   }
 }
 
-unsigned char ProcessFrame(unsigned char Y, unsigned char mem48)
+unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer)
 {
     unsigned char flags = sampledConsonantFlag[Y];
     unsigned char absorbed = 0;
 
     // unvoiced sampled phoneme?
     if(flags & 248) {
-      RenderSample(&mem66, flags, Y);
+      RenderSample(&mem66, flags, Y, bufferpos, buffer);
       // skip ahead two in the phoneme buffer
       speedcounter = speed;
       absorbed = 2;
     } else {
-      CombineGlottalAndFormants(phase1, phase2, phase3, Y);
+      CombineGlottalAndFormants(phase1, phase2, phase3, Y, bufferpos, buffer);
 
       speedcounter--;
       if (speedcounter == 0) {
@@ -110,7 +113,7 @@ unsigned char ProcessFrame(unsigned char Y, unsigned char mem48)
         // voiced sampled phonemes interleave the sample with the
         // glottal pulse. The sample flag is non-zero, so render
         // the sample for the phoneme.
-        RenderSample(&mem66, flags, Y + absorbed);
+        RenderSample(&mem66, flags, Y + absorbed, bufferpos, buffer);
       }
     }
 

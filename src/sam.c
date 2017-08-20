@@ -138,11 +138,11 @@ void PrepareOutput() {
     phonemeIndexOutput[destpos] = A;
     switch(A) {
       case END:
-      Render();
+      Render(&bufferpos, buffer);
       return;
       case BREAK:
       phonemeIndexOutput[destpos] = END;
-      Render();
+      Render(&bufferpos, buffer);
       destpos = 0;
       break;
       case 0:

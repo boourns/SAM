@@ -42,10 +42,6 @@ unsigned char trans(unsigned char a, unsigned char b)
   return ((a * b) >> 8) << 1;
 }
 
-// contains the final soundbuffer
-extern int bufferpos;
-extern char *buffer;
-
 //timetable for more accurate c64 simulation
 int timetable[5][5] =
 {
@@ -56,27 +52,28 @@ int timetable[5][5] =
   {199, 0, 0, 54, 54}
 };
 
-void Output(int index, unsigned char A)
+void Output(int index, unsigned char A, int *bufferpos, char *buffer)
 {
   static unsigned oldtimetableindex = 0;
   int k;
-  bufferpos += timetable[oldtimetableindex][index];
+  (*bufferpos) = (*bufferpos) + timetable[oldtimetableindex][index];
   oldtimetableindex = index;
 
   // write a little bit in advance
   for(k=0; k<5; k++) {
-    buffer[bufferpos/50 + k] = (A & 15)*16;
+    buffer[(*bufferpos)/50 + k] = (A & 15)*16;
+    *bufferpos = *bufferpos + 1;
   }
 }
 
-static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, unsigned char phase1)
+static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, unsigned char phase1, int *bufferpos, char *buffer)
 {
   do {
     unsigned char sample = sampleTable[hi+off];
     unsigned char bit = 8;
     do {
-      if ((sample & 128) != 0) Output(3, 26);
-      else Output(4, 6);
+      if ((sample & 128) != 0) Output(3, 26, bufferpos, buffer);
+      else Output(4, 6, bufferpos, buffer);
       sample <<= 1;
     } while(--bit != 0);
     off++;
@@ -84,14 +81,14 @@ static unsigned char RenderVoicedSample(unsigned short hi, unsigned char off, un
   return off;
 }
 
-static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned char mem53)
+static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned char mem53, int *bufferpos, char *buffer)
 {
   do {
     unsigned char bit = 8;
     unsigned char sample = sampleTable[hi+off];
     do {
-      if ((sample & 128) != 0) Output(2, 5);
-      else Output(1, mem53);
+      if ((sample & 128) != 0) Output(2, 5, bufferpos, buffer);
+      else Output(1, mem53, bufferpos, buffer);
       sample <<= 1;
     } while (--bit != 0);
   } while (++off != 0);
@@ -154,7 +151,7 @@ static void RenderUnvoicedSample(unsigned short hi, unsigned char off, unsigned 
 // For voices samples, samples are interleaved between voiced output.
 
 
-void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned char mem49)
+void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned char mem49, int *bufferpos, char *buffer)
 {
   // mem49 == current phoneme's index
 
@@ -175,10 +172,10 @@ void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned ch
   if(pitch == 0) {
     // voiced phoneme: Z*, ZH, V*, DH
     pitch = pitches[mem49] >> 4;
-    *mem66 = RenderVoicedSample(hi, *mem66, pitch ^ 255);
+    *mem66 = RenderVoicedSample(hi, *mem66, pitch ^ 255, bufferpos, buffer);
     return;
   }
-  RenderUnvoicedSample(hi, pitch^255, tab48426[hibyte]);
+  RenderUnvoicedSample(hi, pitch^255, tab48426[hibyte], bufferpos, buffer);
 }
 
 
@@ -278,7 +275,7 @@ void AssignPitchContour()
 // 3. Offset the pitches by the fundamental frequency.
 //
 // 4. Render the each frame.
-void Render()
+void Render(int *bufferpos, char *buffer)
 {
   if (phonemeIndexOutput[0] == 255) return; //exit if no data
 
@@ -292,7 +289,7 @@ void Render()
     PrintOutput(sampledConsonantFlag, frequency1, frequency2, frequency3, amplitude1, amplitude2, amplitude3, pitches);
   }
 
-  ProcessFrames(t);
+  ProcessFrames(t, bufferpos, buffer);
 }
 
 
