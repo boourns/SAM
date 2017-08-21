@@ -45,7 +45,7 @@ public:
   void EnableSingmode();
   void EnableDebug();
 
-  int SAMMain();
+  int PreparePhonemes();
 
   char* GetBuffer();
   int GetBufferLength();

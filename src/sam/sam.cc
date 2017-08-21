@@ -38,9 +38,9 @@ void SAM::Init() {
   int i;
   SetMouthThroat( mouth, throat);
 
-  bufferpos = 0;
-  // TODO, check for free the memory, 10 seconds of output should be more than enough
-  buffer = (char *) malloc(22050*10);
+  // bufferpos = 0;
+  // // TODO, check for free the memory, 10 seconds of output should be more than enough
+  // buffer = (char *) malloc(22050*10);
 
   for(i=0; i<256; i++) {
     stress[i] = 0;
@@ -55,7 +55,7 @@ void SAM::Init() {
   phonemeindex[255] = END; //to prevent buffer overflow // ML : changed from 32 to 255 to stop freezing with long inputs
 }
 
-int SAM::SAMMain() {
+int SAM::PreparePhonemes() {
   Init();
   /* FIXME: At odds with assignment in Init() */
   phonemeindex[255] = 32; //to prevent buffer overflow
@@ -77,7 +77,6 @@ int SAM::SAMMain() {
 
   if (debug) PrintPhonemes(phonemeindex, phonemeLength, stress);
 
-  PrepareOutput();
   return 1;
 }
 

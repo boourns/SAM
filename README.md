@@ -25,8 +25,36 @@ need a way to save it into user patch
 "Stutter" - likelyhood we repeat a phoneme
 "Chaos" - (carefully) fuck with internal buffers
 
+other settings:
+- trig VS gate
+
 Hardware:
 4-digit hex LED - maybe 3 digits is enough
 maybe LTP-587HR
 driven by shift register + address line picker
 
+
+CODEPATH
+
+Right now
+sam.cc:
+SAMMain()
+- initializes
+- parses and converts phonemes
+- calls PrepareOutput
+
+PrepareOutput()
+- loads phonemes into the render input buffer
+- renders out a word at a time, reusing that input buffer
+
+Render()
+- creates frames
+- transitions frames
+- calls ProcessFrames to actually dump data
+
+What we want, I think:
+- initialize
+- parse and convert phonemes
+...
+- LoadNextWord()
+RenderWord()

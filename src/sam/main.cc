@@ -248,11 +248,13 @@ int main(int argc, char **argv)
 	#endif
 
 	sam->SetInput(input);
-	if (!sam->SAMMain())
+	if (!sam->PreparePhonemes())
 	{
 		PrintUsage();
 		return 1;
 	}
+
+	PrepareOutput();
 
 	if (wavfilename != NULL)
 	WriteWav(wavfilename, sam->GetBuffer(), sam->GetBufferLength()/50);
