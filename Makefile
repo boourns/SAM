@@ -13,7 +13,7 @@ LFLAGS = `sdl-config --libs`
 sam: $(OBJS)
 	$(CC) -o sam $(OBJS) $(LFLAGS)
 
-%.o: src/%.cc
+%.o: src/sam/%.cc
 	$(CC) $(CFLAGS) -c $<
 
 package:
