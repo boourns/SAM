@@ -12,6 +12,10 @@
 #include <SDL_audio.h>
 #endif
 
+// contains the final soundbuffer
+int bufferpos;
+char *buffer;
+
 void WriteWav(char* filename, char* buffer, int bufferlength)
 {
 	FILE *file = fopen(filename, "wb");
@@ -98,8 +102,6 @@ SAM *sam;
 int pos = 0;
 void MixAudio(void *unused, Uint8 *stream, int len)
 {
-	int bufferpos = sam->GetBufferLength();
-	char *buffer = sam->GetBuffer();
 	int i;
 	if (pos >= bufferpos) return;
 	if ((bufferpos-pos) < len) len = (bufferpos-pos);
@@ -112,8 +114,6 @@ void MixAudio(void *unused, Uint8 *stream, int len)
 
 void OutputSound()
 {
-	int bufferpos = sam->GetBufferLength();
-	bufferpos /= 50;
 	SDL_AudioSpec fmt;
 
 	fmt.freq = 22050;
@@ -254,10 +254,22 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	PrepareOutput();
+	buffer = (char *) malloc(22050 * 20);
+	bufferpos = 0;
+	int written = 0;
+	bool finished = false;
+
+	do {
+		finished = sam->LoadNextWord();
+		sam->PrepareFrames();
+		do {
+			written = sam->FillBufferFromFrame(100, &buffer[bufferpos]);
+			bufferpos += written;
+		} while (written == 100);
+	} while (!finished);
 
 	if (wavfilename != NULL)
-	WriteWav(wavfilename, sam->GetBuffer(), sam->GetBufferLength()/50);
+	WriteWav(wavfilename, buffer, bufferpos);
 	else
 	OutputSound();
 

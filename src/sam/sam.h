@@ -7,8 +7,6 @@ public:
   SAM() {
     // sam.cc
     mem59 = 0;
-    bufferpos = 0;
-    buffer = 0;
 
     //standard sam sound
     speed = 72;
@@ -35,7 +33,7 @@ public:
 
   void Insert(unsigned char position, unsigned char mem60, unsigned char mem59, unsigned char mem58);
   void InsertBreath(unsigned char mem59);
-  void PrepareOutput();
+  bool LoadNextWord();
 
   void SetInput(char *_input);
   void SetSpeed(unsigned char _speed);
@@ -54,7 +52,7 @@ public:
   // ---- render.cc
 
   void Output(int index, unsigned char A, int *bufferpos, char *buffer);
-  void Render(int *bufferpos, char *buffer);
+  void PrepareFrames();
   void SetMouthThroat(unsigned char mouth, unsigned char throat);
 
   void RenderSample(unsigned char *mem66, unsigned char consonantFlag, unsigned char mem49, int *bufferpos, char *buffer);
@@ -66,7 +64,12 @@ public:
   void AddInflection(unsigned char inflection, unsigned char phase1, unsigned char pos);
 
   // processframes.cc
-  void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer);
+  void InitFrameProcessor();
+  
+  //void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer);
+  int Drain(int threshold, int count, char *buffer);
+  int FillBufferFromFrame(int count, char *buffer);
+
   unsigned char ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer);
   void CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, unsigned char phase3, unsigned char Y, int *bufferpos, char *buffer);
 
@@ -98,6 +101,9 @@ private:
 
   unsigned char X;
 
+  // this is the cursor into the input phoneme list between word renders
+  unsigned char srcpos;
+
   unsigned char stress[256]; //numbers from 0 to 8
   unsigned char phonemeLength[256]; //tab40160
   unsigned char phonemeindex[256];
@@ -116,11 +122,6 @@ private:
   void change(unsigned char pos, unsigned char val, const char * rule);
   void rule_dipthong(unsigned char p, unsigned char pf, unsigned char pos, unsigned char mem59);
 
-
-  // contains the final soundbuffer
-  int bufferpos;
-  char *buffer;
-
   // ---- render.cc
   unsigned char pitches[256]; // tab43008
 
@@ -135,6 +136,8 @@ private:
   unsigned char sampledConsonantFlag[256]; // tab44800
 
   //processframes.cc
+  unsigned char framesRemaining;
+  unsigned char frameProcessorPosition;
 
   unsigned char speedcounter;
   unsigned char phase1;

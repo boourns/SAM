@@ -9,8 +9,6 @@
 #include "debug.h"
 extern int debug;
 
-//void AddInflection(unsigned char mem48, unsigned char phase1, unsigned char X);
-
 //return = hibyte(mem39212*mem39213) <<  1
 unsigned char trans(unsigned char a, unsigned char b)
 {
@@ -245,12 +243,12 @@ void SAM::AssignPitchContour()
 // 3. Offset the pitches by the fundamental frequency.
 //
 // 4. Render the each frame.
-void SAM::Render(int *bufferpos, char *buffer)
+void SAM::PrepareFrames()
 {
   if (phonemeIndexOutput[0] == 255) return; //exit if no data
 
   CreateFrames();
-  unsigned char t = CreateTransitions();
+  framesRemaining = CreateTransitions();
 
   if (!singmode) AssignPitchContour();
   RescaleAmplitude();
@@ -259,7 +257,7 @@ void SAM::Render(int *bufferpos, char *buffer)
     PrintOutput(sampledConsonantFlag, frequency1, frequency2, frequency3, amplitude1, amplitude2, amplitude3, pitches);
   }
 
-  ProcessFrames(t, bufferpos, buffer);
+  //ProcessFrames(t, bufferpos, buffer);
 }
 
 

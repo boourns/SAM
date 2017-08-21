@@ -27,32 +27,54 @@ void SAM::CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, 
 // reset at the beginning of each glottal pulse.
 //
 
-void SAM::ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer)
-{
-  char *tiny_buffer = (char *) malloc(50000);
-  int tiny_bufferpos = 0;
+char tinyBuffer[5000];
+int tinyBufferPos;
 
-  unsigned char Y = 0;
+void SAM::InitFrameProcessor() {
+  frameProcessorPosition = 0;
   glottal_pulse = pitches[0];
   mem38 = glottal_pulse - (glottal_pulse >> 2); // mem44 * 0.75
+  tinyBufferPos = 0;
+}
 
-  while(mem48) {
-    unsigned char absorbed = ProcessFrame(Y, mem48, &tiny_bufferpos, &tiny_buffer[0]);
-
-    while (tiny_bufferpos / 50 > 20) {
-      // consume a sound byte, leaving 5 in the window.
-      for (int k = 0; k < 5; k++) {
-        buffer[*bufferpos/50] = tiny_buffer[k];
-        *bufferpos = *bufferpos + 50;
-      }
-      for (int k = 5; k < (tiny_bufferpos/50) + 5; k++) {
-        tiny_buffer[k-5] = tiny_buffer[k];
-      }
-      tiny_bufferpos -= 250;
-    }
-    Y += absorbed;
-    mem48 -= absorbed;
+int SAM::Drain(int threshold, int count, char *buffer)
+{
+  int available = (tinyBufferPos / 50) - threshold;
+  if (available <= 0) {
+    return 0;
   }
+
+  // copy out either total available, or remaining count, whichever is lower
+  available = (available > count) ? count : available;
+
+  // consume N sound bytes
+  for (int k = 0; k < available; k++) {
+    buffer[k] = tinyBuffer[k];
+  }
+
+  // move buffer to the left. This could be removed if we implemented a ring buffer with mod in Output
+  for (int k = available; k < (tinyBufferPos/50) + 5; k++) {
+    tinyBuffer[k-available] = tinyBuffer[k];
+  }
+  tinyBufferPos -= (available * 50);
+
+  return available;
+}
+
+int SAM::FillBufferFromFrame(int count, char *buffer)
+{
+  int written = 0;
+  while(framesRemaining && written < count) {
+    unsigned char absorbed = ProcessFrame(frameProcessorPosition, framesRemaining, &tinyBufferPos, &tinyBuffer[0]);
+    written += Drain(20, count - written, &buffer[written]);
+
+    frameProcessorPosition += absorbed;
+    framesRemaining -= absorbed;
+  }
+  if (written < count) {
+    written += Drain(0, count - written, &buffer[written]);
+  }
+  return written;
 }
 
 unsigned char SAM::ProcessFrame(unsigned char Y, unsigned char mem48, int *bufferpos, char *buffer)

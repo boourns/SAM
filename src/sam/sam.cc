@@ -31,8 +31,6 @@ void SAM::SetPitch(unsigned char _pitch) {pitch = _pitch;};
 void SAM::SetMouth(unsigned char _mouth) {mouth = _mouth;};
 void SAM::SetThroat(unsigned char _throat) {throat = _throat;};
 void SAM::EnableSingmode() {singmode = 1;};
-char* SAM::GetBuffer(){return buffer;};
-int SAM::GetBufferLength(){return bufferpos;};
 
 void SAM::Init() {
   int i;
@@ -80,8 +78,8 @@ int SAM::PreparePhonemes() {
   return 1;
 }
 
-void SAM::PrepareOutput() {
-  unsigned char srcpos  = 0; // Position in source
+bool SAM::LoadNextWord() {
+  srcpos = 0; // Position in source
   unsigned char destpos = 0; // Position in output
 
   while(1) {
@@ -89,13 +87,14 @@ void SAM::PrepareOutput() {
     phonemeIndexOutput[destpos] = A;
     switch(A) {
       case END:
-      Render(&bufferpos, buffer);
-      return;
+      //Render(&bufferpos, buffer);
+
+      return true;
       case BREAK:
       phonemeIndexOutput[destpos] = END;
-      Render(&bufferpos, buffer);
-      destpos = 0;
-      break;
+      //Render(&bufferpos, buffer);
+
+      return false;
       case 0:
       break;
       default:
@@ -105,6 +104,7 @@ void SAM::PrepareOutput() {
     }
     ++srcpos;
   }
+  return true;
 }
 
 
