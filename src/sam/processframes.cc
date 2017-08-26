@@ -27,7 +27,8 @@ void SAM::CombineGlottalAndFormants(unsigned char phase1, unsigned char phase2, 
 // reset at the beginning of each glottal pulse.
 //
 
-char tinyBuffer[5000];
+#define MAX_TINY_BUFFER 5000
+char tinyBuffer[MAX_TINY_BUFFER];
 int tinyBufferPos;
 
 void SAM::InitFrameProcessor() {

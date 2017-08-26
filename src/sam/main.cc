@@ -13,8 +13,12 @@
 #endif
 
 // contains the final soundbuffer
+int protectA = 0;
 int bufferpos;
+int protectB = 0;
 char *buffer;
+
+#define MAX_BUFFER (20 * 22050)
 
 void WriteWav(char* filename, char* buffer, int bufferlength)
 {
@@ -254,26 +258,26 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	buffer = (char *) malloc(22050 * 20);
+	buffer = (char *) malloc(MAX_BUFFER);
 	bufferpos = 0;
 	int written = 0;
 	bool finished = false;
 
 	do {
+		printf("loading next frame\n");
 		finished = sam->LoadNextWord();
 		sam->PrepareFrames();
 		do {
 			written = sam->FillBufferFromFrame(100, &buffer[bufferpos]);
+			printf("written %d, outer bufferpos %d\n", written, bufferpos);
 			bufferpos += written;
-		} while (written == 100);
-	} while (!finished);
+		} while (written == 100 && bufferpos < MAX_BUFFER-100);
+	} while (!finished && bufferpos < MAX_BUFFER-100);
 
 	if (wavfilename != NULL)
 	WriteWav(wavfilename, buffer, bufferpos);
 	else
 	OutputSound();
 
-
 	return 0;
-
 }

@@ -19,6 +19,18 @@ public:
     phase1 = 0;
     phase2 = 0;
     phase3 = 0;
+
+    protectA = 0;
+    protectB = 0;
+    protectC = 0;
+    protectD = 0;
+    protectE = 0;
+    protectF = 0;
+    protectG = 0;
+    protectH = 0;
+    protectI = 0;
+    mem66 = 0;
+
   }
 
   ~SAM() { }
@@ -65,7 +77,7 @@ public:
 
   // processframes.cc
   void InitFrameProcessor();
-  
+
   //void ProcessFrames(unsigned char mem48, int *bufferpos, char *buffer);
   int Drain(int threshold, int count, char *buffer);
   int FillBufferFromFrame(int count, char *buffer);
@@ -83,12 +95,14 @@ public:
 private:
 
   // ---- sam.cc
+  int protectA;
   char input[256]; //tab39445
   unsigned char speed;
   unsigned char pitch;
   unsigned char mouth;
   unsigned char throat;
   int singmode;
+  int protectB;
 
   unsigned char mem39;
   unsigned char mem44;
@@ -104,13 +118,19 @@ private:
   // this is the cursor into the input phoneme list between word renders
   unsigned char srcpos;
 
+  int protectC;
+
   unsigned char stress[256]; //numbers from 0 to 8
   unsigned char phonemeLength[256]; //tab40160
   unsigned char phonemeindex[256];
 
+  int protectD;
+
   unsigned char phonemeIndexOutput[60]; //tab47296
   unsigned char stressOutput[60]; //tab47365
   unsigned char phonemeLengthOutput[60]; //tab47416
+
+  int protectE;
 
   void drule(const char * str);
   void drule_pre(const char *descr, unsigned char X);
@@ -123,15 +143,21 @@ private:
   void rule_dipthong(unsigned char p, unsigned char pf, unsigned char pos, unsigned char mem59);
 
   // ---- render.cc
+  int protectF;
+
   unsigned char pitches[256]; // tab43008
 
   unsigned char frequency1[256];
   unsigned char frequency2[256];
   unsigned char frequency3[256];
 
+  int protectG;
+
   unsigned char amplitude1[256];
   unsigned char amplitude2[256];
   unsigned char amplitude3[256];
+
+  int protectH;
 
   unsigned char sampledConsonantFlag[256]; // tab44800
 
@@ -142,10 +168,14 @@ private:
   unsigned char speedcounter;
   unsigned char phase1;
   unsigned char phase2;
+  int protectI;
+
   unsigned char phase3;
   unsigned char mem66;
   unsigned char glottal_pulse;
   unsigned char mem38;
+  int protectJ;
+
 };
 
 //char input[]={"/HAALAOAO MAYN NAAMAEAE IHSTT SAEBAASTTIHAAN \x9b\x9b\0"};
