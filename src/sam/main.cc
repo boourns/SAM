@@ -13,9 +13,7 @@
 #endif
 
 // contains the final soundbuffer
-int protectA = 0;
 int bufferpos;
-int protectB = 0;
 char *buffer;
 
 #define MAX_BUFFER (20 * 22050)
@@ -99,8 +97,8 @@ void PrintUsage()
 	printf("UN           functi(on) (=AXN)         CH        speech		\n");
 	printf("Q            kitt-en (glottal stop)    /H        a(h)ead	\n");
 }
-SAM *sam;
 
+SAM *sam;
 
 #ifdef USESDL
 int pos = 0;

@@ -31,7 +31,7 @@ void SAM::Output(int index, unsigned char A, int *bufferpos, char *buffer)
   int k;
   (*bufferpos) = (*bufferpos) + timetable[oldtimetableindex][index];
   oldtimetableindex = index;
-  if ((*bufferpos/50) + 5 > 5000) {
+  if (((*bufferpos)/50) + 5 >= 5000) {
     return;
   }
 

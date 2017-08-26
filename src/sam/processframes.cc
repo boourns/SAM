@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "sam.h"
 #include "RenderTabs.h"
@@ -54,7 +55,11 @@ int SAM::Drain(int threshold, int count, char *buffer)
   }
 
   // move buffer to the left. This could be removed if we implemented a ring buffer with mod in Output
-  for (int k = available; k < (tinyBufferPos/50) + 5; k++) {
+  int max = (tinyBufferPos/50) + 5;
+  if (max >= 5000) {
+    max = 5000;
+  }
+  for (int k = available; k < max; k++) {
     tinyBuffer[k-available] = tinyBuffer[k];
   }
   tinyBufferPos -= (available * 50);
