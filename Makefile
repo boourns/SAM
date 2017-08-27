@@ -1,4 +1,7 @@
-OBJS = reciter.o sam.o render.o debug.o processframes.o createtransitions.o rendertabs.o wordlist.o
+OBJS = reciter.o sam.o render.o debug.o processframes.o createtransitions.o rendertabs.o
+SAM_OBJS = $(OBJS) main.o
+PARSER_OBJS = $(OBJS) parser.o
+VOCALIST_OBJS = $(OBJS) vocalist.o wordlist.o vocalist_main.o
 
 CC = g++
 
@@ -10,13 +13,19 @@ LFLAGS = `sdl-config --libs`
 #CFLAGS =  -Wall -O2
 #LFLAGS =
 
-all: sam parser
+all: sam parser vocalist
 
-sam: $(OBJS) main.o
-	$(CC) -o sam $(OBJS) main.o $(LFLAGS)
+src/wordlist.cc: parser src/tools/words.rb
+	ruby ./src/tools/words.rb
 
-parser: $(OBJS) parser.o
-	$(CC) -o parser $(OBJS) parser.o
+sam: $(SAM_OBJS)
+	$(CC) -o sam $(SAM_OBJS) $(LFLAGS)
+
+parser: $(PARSER_OBJS)
+	$(CC) -o parser $(PARSER_OBJS)
+
+vocalist: $(VOCALIST_OBJS)
+	$(CC) -o vocalist $(VOCALIST_OBJS) $(LFLAGS)
 
 %.o: src/sam/%.cc
 	$(CC) $(CFLAGS) -c $<
@@ -31,4 +40,4 @@ package:
 	tar -cvzf sam.tar.gz README.md Makefile sing src/
 
 clean:
-	rm *.o
+	rm *.o ./src/wordlist.cc

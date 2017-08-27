@@ -263,7 +263,7 @@ int main(int argc, char **argv)
 
 	do {
 		printf("loading next frame\n");
-		finished = sam->LoadNextWord();
+		finished = sam->LoadNextWord(sam->phonemeindex, sam->phonemeLength, sam->stress, 255);
 		sam->PrepareFrames();
 		do {
 			written = sam->FillBufferFromFrame(100, &buffer[bufferpos]);

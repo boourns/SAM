@@ -78,21 +78,22 @@ int SAM::PreparePhonemes() {
   return 1;
 }
 
-bool SAM::LoadNextWord() {
+bool SAM::LoadNextWord(const unsigned char *phonemeindex, const unsigned char *phonemeLength, const unsigned char *stress, int len) {
   srcpos = 0; // Position in source
   unsigned char destpos = 0; // Position in output
 
-  while(1) {
+  while(srcpos < len) {
     unsigned char A = phonemeindex[srcpos];
     phonemeIndexOutput[destpos] = A;
     switch(A) {
       case END:
       //Render(&bufferpos, buffer);
-
+      printf("loaded word %d length 1\n", destpos);
       return true;
       case BREAK:
       phonemeIndexOutput[destpos] = END;
       //Render(&bufferpos, buffer);
+      printf("loaded word %d length 2 \n", destpos);
 
       return false;
       case 0:
@@ -104,6 +105,11 @@ bool SAM::LoadNextWord() {
     }
     ++srcpos;
   }
+
+  printf("loaded word %d length 3\n", destpos);
+
+  phonemeIndexOutput[destpos] = END;
+
   return true;
 }
 

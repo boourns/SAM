@@ -1,5 +1,6 @@
 *.o
 /sam
 /parser
+/vocalist
 /src/wordlist.cc
 *.json

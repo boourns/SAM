@@ -21,7 +21,7 @@ public:
     phase3 = 0;
 
     mem66 = 0;
-
+    Init();
   }
 
   ~SAM() { }
@@ -36,7 +36,7 @@ public:
 
   void Insert(unsigned char position, unsigned char mem60, unsigned char mem59, unsigned char mem58);
   void InsertBreath(unsigned char mem59);
-  bool LoadNextWord();
+  bool LoadNextWord(const unsigned char *phonemeindex, const unsigned char *phonemeLength, const unsigned char *stress, int len);
 
   void SetInput(char *_input);
   void SetSpeed(unsigned char _speed);
