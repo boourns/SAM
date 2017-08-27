@@ -88,12 +88,10 @@ bool SAM::LoadNextWord(const unsigned char *phonemeindex, const unsigned char *p
     switch(A) {
       case END:
       //Render(&bufferpos, buffer);
-      printf("loaded word %d length 1\n", destpos);
       return true;
       case BREAK:
       phonemeIndexOutput[destpos] = END;
       //Render(&bufferpos, buffer);
-      printf("loaded word %d length 2 \n", destpos);
 
       return false;
       case 0:
@@ -105,8 +103,6 @@ bool SAM::LoadNextWord(const unsigned char *phonemeindex, const unsigned char *p
     }
     ++srcpos;
   }
-
-  printf("loaded word %d length 3\n", destpos);
 
   phonemeIndexOutput[destpos] = END;
 

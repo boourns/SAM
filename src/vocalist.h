@@ -11,6 +11,7 @@ public:
     word = 0;
     trigger = true;
     sam.InitFrameProcessor();
+    sam.EnableSingmode();
   }
 
   ~Vocalist() { }
@@ -19,8 +20,15 @@ public:
   void Trigger(bool trig);
   void SetBank(unsigned char b);
   void SetWord(unsigned char b);
+  void SetPitch(unsigned char pitch) { sam.SetPitch(pitch); }
+  void SetMouth(unsigned char mouth) { sam.SetMouth(mouth); }
+  void SetThroat(unsigned char throat) { sam.SetThroat(throat); }
+  void SetSpeed(unsigned char speed) { sam.SetSpeed(speed); }
 
 private:
+
+  void Load();
+  
   SAM sam;
   unsigned char bank;
   unsigned char word;
