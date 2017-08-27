@@ -58,3 +58,9 @@ What we want, I think:
 ...
 - LoadNextWord()
 RenderWord()
+
+
+ok time to split it in two:
+- interpreter, takes english and converts to phonemes
+- list of phoneme fragments that will be in flash, not in RAM
+- renderer, takes a "patch" which is a list of indexes to phoneme fragments, and all the synth settings, and outputs sounds

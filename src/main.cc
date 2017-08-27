@@ -3,9 +3,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "reciter.h"
-#include "sam.h"
-#include "debug.h"
+#include "sam/reciter.h"
+#include "sam/sam.h"
+#include "sam/debug.h"
 
 #ifdef USESDL
 #include <SDL.h>
@@ -148,7 +148,7 @@ void OutputSound() {}
 
 #endif
 
-int debug = 0;
+extern int debug;
 
 int main(int argc, char **argv)
 {

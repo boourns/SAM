@@ -2,6 +2,7 @@
 
 extern unsigned char signInputTable1[];
 extern unsigned char signInputTable2[];
+int debug = 0;
 
 void PrintPhonemes(unsigned char *phonemeindex, unsigned char *phonemeLength, unsigned char *stress)
 {

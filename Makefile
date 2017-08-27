@@ -1,4 +1,4 @@
-OBJS = reciter.o sam.o render.o main.o debug.o processframes.o createtransitions.o rendertabs.o
+OBJS = reciter.o sam.o render.o debug.o processframes.o createtransitions.o rendertabs.o wordlist.o
 
 CC = g++
 
@@ -10,10 +10,21 @@ LFLAGS = `sdl-config --libs`
 #CFLAGS =  -Wall -O2
 #LFLAGS =
 
-sam: $(OBJS)
-	$(CC) -o sam $(OBJS) $(LFLAGS)
+all: sam parser
+
+sam: $(OBJS) main.o
+	$(CC) -o sam $(OBJS) main.o $(LFLAGS)
+
+parser: $(OBJS) parser.o
+	$(CC) -o parser $(OBJS) parser.o
 
 %.o: src/sam/%.cc
+	$(CC) $(CFLAGS) -c $<
+
+%.o: src/tools/%.cc
+	$(CC) $(CFLAGS) -c $<
+
+%.o: src/%.cc
 	$(CC) $(CFLAGS) -c $<
 
 package:

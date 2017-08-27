@@ -83,8 +83,6 @@ public:
   void interpolate(unsigned char width, unsigned char table, unsigned char frame, unsigned char mem53);
   void interpolate_pitch(unsigned char width, unsigned char pos, unsigned char mem49, unsigned char phase3);
 
-private:
-
   // ---- sam.cc
   char input[256]; //tab39445
   unsigned char speed;
