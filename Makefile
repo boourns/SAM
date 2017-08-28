@@ -25,7 +25,7 @@ parser: $(PARSER_OBJS)
 	$(CC) -o parser $(PARSER_OBJS)
 
 vocalist: $(VOCALIST_OBJS)
-	$(CC) -o vocalist $(VOCALIST_OBJS) $(LFLAGS)
+	$(CC) -o vocalist $(VOCALIST_OBJS) $(LFLAGS) -lrtmidi
 
 %.o: src/sam/%.cc
 	$(CC) $(CFLAGS) -c $<

@@ -14,6 +14,17 @@
 #include <SDL_audio.h>
 #endif
 
+#include "RtMidi.h"
+
+#define NUM_PITCHES 32
+#define MIDI_BASE 48
+
+unsigned char pitches[] = {
+ 115, 108, 103, 98, 94, 88, 82, 78, 74, 70, 66, 62,
+ 58, 55, 52, 49, 46, 44, 42, 39, 37, 35, 33, 31,
+ 29, 28, 26, 25, 23, 22, 21, 20
+};
+
 // void WriteWav(char* filename, char* buffer, int bufferlength)
 // {
 // 	FILE *file = fopen(filename, "wb");
@@ -56,7 +67,7 @@ void MixAudio(void *unused, Uint8 *stream, int len)
 	vocalist->FillBuffer((char *) stream, len);
 }
 
-void OutputSound()
+void UILoop(RtMidiIn *midi)
 {
 	SDL_AudioSpec fmt;
 
@@ -79,6 +90,10 @@ void OutputSound()
 	SDL_Event event;
 	int quit = 0;
 
+	double stamp;
+	std::vector<unsigned char> message;
+	int nBytes;
+
 	while (!quit)
 	{
 		while(SDL_PollEvent(&event))
@@ -94,6 +109,33 @@ void OutputSound()
 				}
 			}
 		}
+
+		stamp = midi->getMessage( &message );
+    nBytes = message.size();
+		if (nBytes > 0) {
+			// note on
+			if ((int)message[0] == 144) {
+				unsigned char pitch = (unsigned char)message[1];
+				if (pitch < MIDI_BASE) {
+					pitch = pitches[0];
+				} else if (pitch > MIDI_BASE + NUM_PITCHES) {
+					pitch = MIDI_BASE + NUM_PITCHES;
+				} else {
+					pitch = pitches[pitch-MIDI_BASE];
+				}
+				vocalist->SetPitch(pitch);
+				vocalist->Trigger(true);
+			}
+			else if ((int) message[0] == 128) {
+				vocalist->Trigger(false);
+			}
+		}
+
+    // for ( i=0; i<nBytes; i++ )
+    //   std::cout << "Byte " << i << " = " << (int)message[i] << ", ";
+    // if ( nBytes > 0 )
+    //   std::cout << "stamp = " << stamp << std::endl;
+
 		SDL_Delay(20);
 	}
 
@@ -101,6 +143,33 @@ void OutputSound()
 }
 
 extern int debug;
+
+RtMidiIn *initMidi() {
+
+	// Check inputs.
+	RtMidiIn *midiin = 0;
+	// RtMidiIn constructor
+	try {
+		midiin = new RtMidiIn();
+	}
+	catch (RtMidiError &error) {
+		// Handle the exception here
+		error.printMessage();
+	}
+
+  if (midiin->getPortCount() == 0) {
+		printf("No MIDI input ports found.\n");
+		printf("If using OSX, open Audio MIDI Setup, double click 'IAC Driver', and check 'device is online'.\n");
+		delete midiin;
+		return 0;
+	}
+
+	midiin->openPort(0);
+	// ignore sysex, timing, and active sensing messages.
+  midiin->ignoreTypes( true, true, true );
+
+	return midiin;
+}
 
 int main(int argc, char **argv)
 {
@@ -113,7 +182,12 @@ int main(int argc, char **argv)
 	}
 	atexit(SDL_Quit);
 
-	OutputSound();
+	RtMidiIn *midi = initMidi();
 
+	if (midi != 0) {
+		UILoop(midi);
+	}
+
+	delete midi;
 	return 0;
 }

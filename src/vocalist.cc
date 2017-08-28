@@ -6,12 +6,10 @@
 
 void Vocalist::SetBank(unsigned char b) {
   bank = b;
-  Load();
 }
 
 void Vocalist::SetWord(unsigned char w) {
   word = w;
-  Load();
 }
 
 void Vocalist::Load() {
@@ -27,6 +25,11 @@ void Vocalist::Load() {
 }
 
 void Vocalist::FillBuffer(char *output, int len) {
+  if (risingEdge) {
+    Load();
+    risingEdge = false;
+  }
+
   if (!playing && trigger) {
     playing = true;
   }
@@ -38,7 +41,6 @@ void Vocalist::FillBuffer(char *output, int len) {
   if (written < len) {
     playing = false;
     SetWord((word + 1) % NUM_WORDS);
-    sam.SetPitch(rand() % 256);
     sam.SetThroat(rand() % 256);
     sam.SetMouth(rand() % 256);
     sam.SetSpeed(rand() % 256);
@@ -49,5 +51,8 @@ void Vocalist::FillBuffer(char *output, int len) {
 }
 
 void Vocalist::Trigger(bool trig) {
+  if (!trigger && trig) {
+    risingEdge = true;
+  }
   trigger = trig;
 }

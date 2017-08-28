@@ -9,7 +9,7 @@ public:
     playing = false;
     bank = 0;
     word = 0;
-    trigger = true;
+    risingEdge = 0;
     sam.InitFrameProcessor();
     sam.EnableSingmode();
   }
@@ -28,11 +28,12 @@ public:
 private:
 
   void Load();
-  
+
   SAM sam;
   unsigned char bank;
   unsigned char word;
   bool trigger;
+  bool risingEdge;
   bool playing;
 };
 
