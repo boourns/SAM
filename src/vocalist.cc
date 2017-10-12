@@ -14,12 +14,25 @@ void Vocalist::SetWord(unsigned char w) {
 
 void Vocalist::Load() {
   playing = false;
-  sam.LoadNextWord(
-    &data[wordpos[bank][word]],
-    &data[wordpos[bank][word] + wordlen[bank][word]],
-    &data[wordpos[bank][word] + (wordlen[bank][word] << 1)],
-    wordlen[bank][word]
-  );
+  if (mode == MODE_NORMAL) {
+    sam.LoadNextWord(
+      &data[wordpos[bank][word]],
+      &data[wordpos[bank][word] + wordlen[bank][word]],
+      &data[wordpos[bank][word] + (wordlen[bank][word] << 1)],
+      wordlen[bank][word]
+    );
+    sam.InitFrameProcessor();
+    sam.PrepareFrames();
+  } else {
+    LoadRando();
+  }
+}
+
+void Vocalist::LoadRando() {
+  for (int i = 0; i < 24; i++) {
+    rando[i] = rand() % 256;
+  }
+  sam.LoadNextWord(&rando[0], &rando[8], &rando[16], 8);
   sam.InitFrameProcessor();
   sam.PrepareFrames();
 }
@@ -39,11 +52,12 @@ void Vocalist::FillBuffer(char *output, int len) {
     written = sam.FillBufferFromFrame(len, &output[0]);
   }
   if (written < len) {
-    playing = false;
-    SetWord((word + 1) % NUM_WORDS);
-    sam.SetThroat(rand() % 256);
-    sam.SetMouth(rand() % 256);
-    sam.SetSpeed(rand() % 256);
+    if (mode == MODE_NORMAL) {
+      playing = false;
+      SetWord((word + 1) % NUM_WORDS);
+    } else {
+      LoadRando();
+    }
   }
   for (int i = written; i < len; i++) {
     output[i] = 0x80;

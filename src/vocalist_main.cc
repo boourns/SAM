@@ -110,26 +110,50 @@ void UILoop(RtMidiIn *midi)
 			}
 		}
 
-		stamp = midi->getMessage( &message );
-    nBytes = message.size();
-		if (nBytes > 0) {
-			// note on
-			if ((int)message[0] == 144) {
-				unsigned char pitch = (unsigned char)message[1];
-				if (pitch < MIDI_BASE) {
-					pitch = pitches[0];
-				} else if (pitch > MIDI_BASE + NUM_PITCHES) {
-					pitch = MIDI_BASE + NUM_PITCHES;
-				} else {
-					pitch = pitches[pitch-MIDI_BASE];
-				}
-				vocalist->SetPitch(pitch);
-				vocalist->Trigger(true);
-			}
-			else if ((int) message[0] == 128) {
-				vocalist->Trigger(false);
-			}
-		}
+		do {
+      stamp = midi->getMessage( &message );
+      nBytes = message.size();
+  		if (nBytes > 0) {
+  			// note on
+  			if ((int)message[0] == 144) {
+  				unsigned char pitch = (unsigned char)message[1];
+  				if (pitch < MIDI_BASE) {
+  					pitch = pitches[0];
+  				} else if (pitch > MIDI_BASE + NUM_PITCHES) {
+  					pitch = MIDI_BASE + NUM_PITCHES;
+  				} else {
+  					pitch = pitches[pitch-MIDI_BASE];
+  				}
+  				vocalist->SetPitch(pitch);
+  				vocalist->Trigger(true);
+  			}
+  			else if ((int) message[0] == 128) {
+  				vocalist->Trigger(false);
+  			} else if ((int) message[0] == 0xB0) {
+          unsigned char value = (unsigned char) message[2];
+          switch((int) message[1]) {
+          case 10:
+            vocalist->SetSpeed(value);
+            break;
+          case 11:
+            vocalist->SetMouth(value);
+            break;
+          case 12:
+            vocalist->SetThroat(value);
+            break;
+          case 13:
+            if (value < 40) {
+              vocalist->SetMode(MODE_NORMAL);
+            } else if (value < 80) {
+              vocalist->SetMode(MODE_CRAZY);
+            } else {
+              vocalist->SetMode(MODE_REALLY_CRAZY);
+            }
+          }
+
+        }
+  		}
+    } while (nBytes > 0);
 
     // for ( i=0; i<nBytes; i++ )
     //   std::cout << "Byte " << i << " = " << (int)message[i] << ", ";

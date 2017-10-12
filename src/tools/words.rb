@@ -5,13 +5,20 @@ banks = [
   [
     "hello",
     "electronic",
-    "carrot",
-    "chip",
-    "dont",
-    "fall",
-    "go",
-    "to",
-    "bed"
+    "robot",
+    "yeah",
+    "harder",
+    "faster",
+    "better",
+    "stronger",
+    "techno",
+    "punk music",
+    "hacker",
+    "bass",
+    "drums",
+    "baby",
+    "girl",
+    "swag"
   ]
 ]
 
