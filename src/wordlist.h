@@ -9,8 +9,8 @@ extern const unsigned short wordlen[1][16];
 extern const unsigned int wordpos[1][16];
 
 extern const unsigned char validOffset[];
-extern const unsigned short validOffsetLen[1][16];
-extern const unsigned int validOffsetPos[1][16];
+extern const unsigned char validOffsetLen[1][16];
+extern const unsigned short validOffsetPos[1][16];
 
 #define NUM_BANKS 1
 #define NUM_WORDS 16

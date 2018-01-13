@@ -13,7 +13,7 @@ void PrintUsage()
 }
 
 int validOffsetLen;
-char validOffset[255];
+unsigned char validOffset[255];
 
 SAM *sam;
 
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	printf(",\n");
 	printArray("sampledConsonantFlag", &sam->sampledConsonantFlag[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("validOffset", &sam->sampledConsonantFlag[0], validOffsetLen);
+	printArray("validOffset", &validOffset[0], validOffsetLen);
 	printf("\n}\n");
 
 	return 0;

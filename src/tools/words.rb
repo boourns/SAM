@@ -24,10 +24,6 @@ banks = [
 
 phoneme_cache = "phonemes.json"
 
-def load(filename)
-  File.exist?(filename) ? JSON.parse(File.read(filename)) : {}
-end
-
 def save(filename, data)
   File.write(filename, data.to_json)
 end
@@ -36,7 +32,7 @@ def generate_phoneme(word)
   return JSON.parse(`./parser #{word}`)
 end
 
-phonemes = load(phoneme_cache)
+phonemes = {}
 
 # build cache
 banks.each_with_index do |words, bank_number|
@@ -139,8 +135,8 @@ extern const unsigned short wordlen[#{banks.count}][#{banks[0].count}];
 extern const unsigned int wordpos[#{banks.count}][#{banks[0].count}];
 
 extern const unsigned char validOffset[];
-extern const unsigned short validOffsetLen[#{banks.count}][#{banks[0].count}];
-extern const unsigned int validOffsetPos[#{banks.count}][#{banks[0].count}];
+extern const unsigned char validOffsetLen[#{banks.count}][#{banks[0].count}];
+extern const unsigned short validOffsetPos[#{banks.count}][#{banks[0].count}];
 
 #define NUM_BANKS #{banks.count}
 #define NUM_WORDS #{banks[0].count}
