@@ -12,16 +12,34 @@ void PrintUsage()
 	// TODO
 }
 
+int validOffsetLen;
+char validOffset[255];
+
 SAM *sam;
+
+void calculateValidOffsets() {
+	// calculate valid offset positions
+    validOffsetLen = 0;
+    int i = 0;
+    while (i < sam->framesRemaining) {
+      validOffset[validOffsetLen++] = i;
+
+      if (sam->sampledConsonantFlag[i] & 248) {
+        i += 2;
+      } else {
+        i += 1;
+      }
+    }
+}
 
 extern int debug;
 
-void printArray(const char *name, unsigned char *target) {
+void printArray(const char *name, unsigned char *target, int len) {
 	printf("\"%s\": [", name);
 	bool first = true;
 	int i = 0;
 
-	while(i < sam->framesRemaining)
+	while(i < len)
 	{
 		if (!first) {
 			printf(", ");
@@ -93,6 +111,7 @@ int main(int argc, char **argv)
 
 	sam->InitFrameProcessor();
     sam->PrepareFrames();
+    calculateValidOffsets();
 
     // frequency1
     // frequency2
@@ -104,21 +123,23 @@ int main(int argc, char **argv)
     // unsigned char sampledConsonantFlag[256];
 
 	printf("{\n");
-	printArray("frequency1", &sam->frequency1[0]);
+	printArray("frequency1", &sam->frequency1[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("frequency2", &sam->frequency1[0]);
+	printArray("frequency2", &sam->frequency2[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("frequency2", &sam->frequency1[0]);
+	printArray("frequency3", &sam->frequency3[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("pitches", &sam->pitches[0]);
+	printArray("pitches", &sam->pitches[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("amplitude1", &sam->amplitude1[0]);
+	printArray("amplitude1", &sam->amplitude1[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("amplitude2", &sam->amplitude2[0]);
+	printArray("amplitude2", &sam->amplitude2[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("amplitude3", &sam->amplitude3[0]);
+	printArray("amplitude3", &sam->amplitude3[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("sampledConsonantFlag", &sam->sampledConsonantFlag[0]);
+	printArray("sampledConsonantFlag", &sam->sampledConsonantFlag[0], sam->framesRemaining);
+	printf(",\n");
+	printArray("validOffset", &sam->sampledConsonantFlag[0], validOffsetLen);
 	printf("\n}\n");
 
 	return 0;
