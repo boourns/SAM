@@ -16,12 +16,12 @@ SAM *sam;
 
 extern int debug;
 
-void printArray(const char *name, unsigned char *phonemeindex, unsigned char *target) {
+void printArray(const char *name, unsigned char *target) {
 	printf("\"%s\": [", name);
 	bool first = true;
 	int i = 0;
 
-	while((phonemeindex[i] != 255) && (i < 255))
+	while(i < sam->framesRemaining)
 	{
 		if (!first) {
 			printf(", ");
@@ -89,12 +89,36 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	sam->LoadNextWord(&sam->phonemeindex[0], &sam->phonemeLength[0], &sam->stress[0], 255);
+
+	sam->InitFrameProcessor();
+    sam->PrepareFrames();
+
+    // frequency1
+    // frequency2
+    // frequency3
+    // pitches
+    // amplitude1[256];
+    // unsigned char amplitude2[256];
+    // unsigned char amplitude3[256];
+    // unsigned char sampledConsonantFlag[256];
+
 	printf("{\n");
-	printArray("index", &sam->phonemeindex[0], &sam->phonemeindex[0]);
+	printArray("frequency1", &sam->frequency1[0]);
 	printf(",\n");
-	printArray("length", &sam->phonemeindex[0], &sam->phonemeLength[0]);
+	printArray("frequency2", &sam->frequency1[0]);
 	printf(",\n");
-	printArray("stress", &sam->phonemeindex[0], &sam->stress[0]);
+	printArray("frequency2", &sam->frequency1[0]);
+	printf(",\n");
+	printArray("pitches", &sam->pitches[0]);
+	printf(",\n");
+	printArray("amplitude1", &sam->amplitude1[0]);
+	printf(",\n");
+	printArray("amplitude2", &sam->amplitude2[0]);
+	printf(",\n");
+	printArray("amplitude3", &sam->amplitude3[0]);
+	printf(",\n");
+	printArray("sampledConsonantFlag", &sam->sampledConsonantFlag[0]);
 	printf("\n}\n");
 
 	return 0;

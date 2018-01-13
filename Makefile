@@ -13,7 +13,7 @@ LFLAGS = `sdl-config --libs`
 #CFLAGS =  -Wall -O2
 #LFLAGS =
 
-all: sam parser vocalist
+all: sam parser src/wordlist.cc
 
 src/wordlist.cc: parser src/tools/words.rb
 	ruby ./src/tools/words.rb
