@@ -69,6 +69,8 @@ int main(int argc, char **argv)
 	}
 
 	sam = new SAM();
+	sam->EnableSingmode();
+	sam->SetPitch(98);
 
 	i = 1;
 	while(i < argc)
