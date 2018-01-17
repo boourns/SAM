@@ -19,7 +19,43 @@ banks = [
     "baby",
     "girl",
     "swag"
-  ]
+  ],
+  [
+    "asylum",
+    "hello",
+    "quixotic",
+    "electronic",
+    "enigmatic",
+    "galapagos",
+    "defribrillate",
+    "propulsion",
+    "supernova",
+    "climactic",
+    "exfoliate",
+    "synchronicity",
+    "minimalism",
+    "spherical",
+    "filibuster",
+    "ottawa"
+  ],
+  # [
+  #   "and i will always love you",
+  #   "im singing in the rain",
+  #   "what a glorious feeling im happy again",
+  #   "oh say can you see by the dawns early light",
+  #   "doo",
+  #   "la",
+  #   "dough",
+  #   "ray",
+  #   "me",
+  #   "fah",
+  #   "so",
+  #   "la",
+  #   "tee",
+  #   "baybee",
+  #   "oooh",
+  #   "aaaah"
+  # ]
 ]
 
 phoneme_cache = "phonemes.json"
@@ -32,6 +68,26 @@ def generate_phoneme(word)
   return JSON.parse(`./parser #{word}`)
 end
 
+def rle(arr)
+  result = []
+  el = arr.shift
+  count = 1
+  arr.each do |item|
+    if item == el
+      count += 1
+    else
+      result << count
+      result << el
+      el = item
+      count = 1
+    end
+  end
+  result << count
+  result << el
+  result
+end
+
+voiceTables = %w(frequency1 frequency2 frequency3 pitches amplitude1 amplitude2 amplitude3 sampledConsonantFlag)
 phonemes = {}
 
 # build cache
@@ -39,11 +95,13 @@ banks.each_with_index do |words, bank_number|
   words.each do |word, word_number|
     if phonemes[word].nil?
       phonemes[word] = generate_phoneme(word)
+      voiceTables.each do |table|
+        phonemes[word][table] = rle(phonemes[word][table])
+      end
     end
   end
 end
 
-save(phoneme_cache, phonemes)
 wordpos = {}
 validOffsetPos = {}
 
@@ -61,26 +119,34 @@ const unsigned char data[] = {
   banks.each_with_index do |words, bank_number|
     words.each do |word, word_number|
       wordpos[word] = index
-      %w(frequency1 frequency2 frequency3 pitches amplitude1 amplitude2 amplitude3 sampledConsonantFlag).each do |table|
+
+      # since we're RLE we need to write the offsets into data to find the start
+      # of each table within the voice data.
+      tableLengths = voiceTables.map do |table|
+        phonemes[word][table].size
+      end
+
+      if tableLengths.any? {|t| t > 255}
+        puts "Error: word #{word} generated table too long, try shortening it"
+        exit 1
+      end
+
+      file.write(tableLengths.join(", ") + ", ")
+      index += tableLengths.size
+
+      voiceTables.each do |table|
         if phonemes[word][table] == nil
           debugger
         end
-        file.write(phonemes[word][table].join(", "))
+        compressed = phonemes[word][table]
+        file.write(compressed.join(", "))
         file.write(', ')
-        index += phonemes[word][table].count
+        index += compressed.size
       end
       file.write "// #{word}\n"
     end
   end
   file.write("};\n\n")
-
-  file.write("const unsigned short wordlen[#{banks.count}][#{banks[0].count}] = {\n")
-  banks.each_with_index do |bank, bank_number|
-    file.write("{")
-    file.write(bank.map { |word| phonemes[word]['frequency1'].count }.join(', '))
-    file.write("},\n")
-  end
-  file.write("};\n")
 
   file.write("const unsigned int wordpos[#{banks.count}][#{banks[0].count}] = {\n")
   banks.each_with_index do |bank, bank_number|
