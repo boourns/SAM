@@ -2,24 +2,24 @@ require 'json'
 require 'byebug'
 
 banks = [
-  [
-    "hello",
-    "electronic",
-    "robot",
-    "yeah",
-    "harder",
-    "faster",
-    "better",
-    "stronger",
-    "techno",
-    "punk music",
-    "hacker",
-    "bass",
-    "drums",
-    "baby",
-    "girl",
-    "swag"
-  ],
+  # [
+  #   "hello",
+  #   "electronic",
+  #   "robot",
+  #   "yeah",
+  #   "harder",
+  #   "faster",
+  #   "better",
+  #   "stronger",
+  #   "techno",
+  #   "punk music",
+  #   "hacker",
+  #   "bass",
+  #   "drums",
+  #   "baby",
+  #   "girl",
+  #   "swag"
+  # ],
   [
     "asylum",
     "hello",
@@ -38,24 +38,24 @@ banks = [
     "filibuster",
     "ottawa"
   ],
-  # [
-  #   "and i will always love you",
-  #   "im singing in the rain",
-  #   "what a glorious feeling im happy again",
-  #   "oh say can you see by the dawns early light",
-  #   "doo",
-  #   "la",
-  #   "dough",
-  #   "ray",
-  #   "me",
-  #   "fah",
-  #   "so",
-  #   "la",
-  #   "tee",
-  #   "baybee",
-  #   "oooh",
-  #   "aaaah"
-  # ]
+  [
+    "and i will always love you",
+    "im singing in the rain",
+    "what a glorious feeling im happy again",
+    "oh say can you see by the dawns early light",
+    "doo",
+    "la",
+    "dough",
+    "ray",
+    "me",
+    "fah",
+    "so",
+    "la",
+    "tee",
+    "baybee",
+    "oooh",
+    "aaaah"
+  ]
 ]
 
 phoneme_cache = "phonemes.json"
@@ -103,7 +103,7 @@ banks.each_with_index do |words, bank_number|
 end
 
 wordpos = {}
-validOffsetPos = {}
+doubleAbsorbPos = {}
 
 index = 0
 
@@ -158,31 +158,34 @@ const unsigned char data[] = {
 
   # output data
   index = 0
-  file.write('const unsigned char validOffset[] = {')
+  file.write('const unsigned char doubleAbsorbOffset[] = {')
 
   banks.each_with_index do |words, bank_number|
     words.each do |word, word_number|
-      validOffsetPos[word] = index
-      file.write(phonemes[word]['validOffset'].join(", "))
-      file.write(', ')
-      index += phonemes[word]['validOffset'].count
-      file.write "// #{word}\n"
+      doubleAbsorbPos[word] = index
+      file.write(phonemes[word]['doubleAbsorbOffset'].join(", "))
+      count = phonemes[word]['doubleAbsorbOffset'].count
+      if count > 0
+        file.write(', ')
+        index += count 
+        file.write "// #{word}\n"
+      end
     end
   end
   file.write("};\n\n")
 
-  file.write("const unsigned char validOffsetLen[#{banks.count}][#{banks[0].count}] = {\n")
+  file.write("const unsigned char doubleAbsorbLen[#{banks.count}][#{banks[0].count}] = {\n")
   banks.each_with_index do |bank, bank_number|
     file.write("{")
-    file.write(bank.map { |word| phonemes[word]['validOffset'].count }.join(', '))
+    file.write(bank.map { |word| phonemes[word]['doubleAbsorbOffset'].count }.join(', '))
     file.write("},\n")
   end
   file.write("};\n")
 
-  file.write("const unsigned short validOffsetPos[#{banks.count}][#{banks[0].count}] = {\n")
+  file.write("const unsigned short doubleAbsorbPos[#{banks.count}][#{banks[0].count}] = {\n")
   banks.each_with_index do |bank, bank_number|
     file.write("{")
-    file.write(bank.map { |word| validOffsetPos[word] }.join(', '))
+    file.write(bank.map { |word| doubleAbsorbPos[word] }.join(', '))
     file.write("},\n")
   end
   file.write("};\n")
@@ -200,9 +203,9 @@ extern const unsigned char data[];
 extern const unsigned short wordlen[#{banks.count}][#{banks[0].count}];
 extern const unsigned int wordpos[#{banks.count}][#{banks[0].count}];
 
-extern const unsigned char validOffset[];
-extern const unsigned char validOffsetLen[#{banks.count}][#{banks[0].count}];
-extern const unsigned short validOffsetPos[#{banks.count}][#{banks[0].count}];
+extern const unsigned char doubleAbsorbOffset[];
+extern const unsigned char doubleAbsorbLen[#{banks.count}][#{banks[0].count}];
+extern const unsigned short doubleAbsorbPos[#{banks.count}][#{banks[0].count}];
 
 #define NUM_BANKS #{banks.count}
 #define NUM_WORDS #{banks[0].count}

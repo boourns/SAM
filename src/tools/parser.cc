@@ -12,22 +12,18 @@ void PrintUsage()
 	// TODO
 }
 
-int validOffsetLen;
-unsigned char validOffset[255];
+int doubleAbsorbLen;
+unsigned char doubleAbsorbOffset[255];
 
 SAM *sam;
 
-void calculateValidOffsets() {
+void calculateDoubleAbsorbs() {
 	// calculate valid offset positions
-    validOffsetLen = 0;
-    int i = 0;
-    while (i < sam->framesRemaining) {
-      validOffset[validOffsetLen++] = i;
-
+    doubleAbsorbLen = 0;
+    
+    for (int i = 0; i < sam->framesRemaining; i++) {
       if (sam->sampledConsonantFlag[i] & 248) {
-        i += 2;
-      } else {
-        i += 1;
+        doubleAbsorbOffset[doubleAbsorbLen++] = i;
       }
     }
 }
@@ -113,7 +109,7 @@ int main(int argc, char **argv)
 
 	sam->InitFrameProcessor();
     sam->PrepareFrames();
-    calculateValidOffsets();
+    calculateDoubleAbsorbs();
 
     // frequency1
     // frequency2
@@ -141,7 +137,7 @@ int main(int argc, char **argv)
 	printf(",\n");
 	printArray("sampledConsonantFlag", &sam->sampledConsonantFlag[0], sam->framesRemaining);
 	printf(",\n");
-	printArray("validOffset", &validOffset[0], validOffsetLen);
+	printArray("doubleAbsorbOffset", &doubleAbsorbOffset[0], doubleAbsorbLen);
 	printf("\n}\n");
 
 	return 0;
